@@ -104,7 +104,7 @@
                                     </span>
                                 </td>
                                 <td class="pe-4 text-end">
-                                    <% if(['Pending', 'Reopened', 'FAILED'].includes(complaint.status)) { %>
+                                    <% if(['PENDING', 'IN_PROGRESS', 'REOPENED', 'FAILED'].includes(complaint.status)) { %>
                                         <form action="/department/<%= complaint._id %>/resolve" method="POST" style="display:inline;">
                                             <button type="submit" class="btn-zinc btn-sm py-2 px-3 d-inline-flex align-items-center gap-2" style="font-size: 0.75rem;">
                                                 <i data-lucide="check-circle-2" style="width: 14px;"></i> Mark Resolved

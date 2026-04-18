@@ -11,8 +11,8 @@ const seedComplaints = [
         phoneNumber: '9876543210',
         district: 'Ahmedabad',
         department: 'Roads & Buildings',
-        status: 'Pending',
-        evidence: { photo_uploaded: 0, gps_match_flag: 0 }
+        status: 'PENDING',
+        evidence: { photo_uploaded: 0, gps_match_flag: 0, ivr_call_status: 'NOT_CALLED' }
     },
     {
         subject: 'Waste Accumulation in Public Park',
@@ -21,7 +21,7 @@ const seedComplaints = [
         district: 'Gandhinagar',
         department: 'Urban Development',
         status: 'RESOLVED_PENDING_VERIFICATION',
-        evidence: { photo_uploaded: 0, gps_match_flag: 0 }
+        evidence: { photo_uploaded: 0, gps_match_flag: 0, ivr_call_status: 'PENDING' }
     },
     {
         subject: 'Bridge Structural Concerns',
@@ -33,25 +33,50 @@ const seedComplaints = [
         evidence: {
             photo_uploaded: 1,
             photo_url: 'https://images.unsplash.com/photo-1545147418-4f1e62640246?auto=format&fit=crop&w=400&q=80',
-            gps_lat: 21.1702,
-            gps_lng: 72.8311,
             gps_match_flag: 1,
             gps_distance_meters: 120,
             ivr_call_status: 'SUCCESS',
-            ivr_response: 1
+            ivr_response: 1,
+            ivr_called_at: new Date()
         },
         verification: {
             risk_score: 12,
             confidence: 0.94,
             reason: 'High confidence match. GPS location verified within 150m. Citizen confirmed resolution via IVR.',
-            status: 'VERIFIED'
+            status: 'VERIFIED',
+            verified_at: new Date()
         }
+    },
+    {
+        subject: 'Street Light Failure — Sector 12',
+        description: 'Multiple street lights non-functional for over 2 weeks. Safety hazard at night.',
+        phoneNumber: '9988776655',
+        district: 'Ahmedabad',
+        department: 'Electricity',
+        status: 'REOPENED',
+        evidence: {
+            photo_uploaded: 1,
+            gps_match_flag: 0,
+            ivr_call_status: 'DISPUTED',
+            ivr_response: 2,
+            ivr_called_at: new Date()
+        },
+        verification: {
+            risk_score: 65,
+            confidence: 0.35,
+            reason: 'Citizen disputed resolution via IVR.',
+            flags: ['Citizen disputed resolution', 'GPS location mismatch'],
+            status: 'REOPENED',
+            reopen_flag: 1,
+            verified_at: new Date()
+        },
+        reopen_count: 1
     }
 ];
 
 const seedData = async () => {
     try {
-        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/grievance-verification');
+        await mongoose.connect(process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://localhost:27017/grievance-db');
         console.log('Connected to MongoDB for seeding...');
 
         // WIPE DATA
@@ -62,7 +87,7 @@ const seedData = async () => {
 
         // SEED COMPLAINTS
         await Complaint.insertMany(seedComplaints);
-        console.log('Successfully seeded 3 sample complaints.');
+        console.log(`Successfully seeded ${seedComplaints.length} sample complaints.`);
 
         // Initialize Department Scores
         const depts = [
