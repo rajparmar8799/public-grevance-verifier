@@ -16,5 +16,11 @@
   "bugs": {
     "url": "https://github.com/Joy-Chauhan11/Grievance-verification/issues"
   },
-  "homepage": "https://github.com/Joy-Chauhan11/Grievance-verification#readme"
+  "homepage": "https://github.com/Joy-Chauhan11/Grievance-verification#readme",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "ejs": "^5.0.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.4.1"
+  }
 }

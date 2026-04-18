@@ -1,0 +1,26 @@
+<%- include('../layout/header') %>
+
+<div class="login-box" style="max-width: 600px;">
+    <h3 class="border-bottom pb-2 mb-3">File New Complaint</h3>
+    <form action="/citizen/new" method="POST">
+        <div class="mb-3">
+            <label for="subject" class="form-label fw-bold">Subject:</label>
+            <input type="text" class="form-control" name="subject" id="subject" required>
+        </div>
+        
+        <div class="mb-3">
+            <label for="phoneNumber" class="form-label fw-bold">Mobile Number:</label>
+            <input type="text" class="form-control" name="phoneNumber" id="phoneNumber" placeholder="10 Digits" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="description" class="form-label fw-bold">Description & Address:</label>
+            <textarea name="description" id="description" rows="4" class="form-control" required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 mt-2">Submit</button>
+        <a href="/citizen" class="text-center d-block mt-3">Back to Dashboard</a>
+    </form>
+</div>
+
+<%- include('../layout/footer') %>

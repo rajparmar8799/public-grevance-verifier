@@ -1,0 +1,99 @@
+<%- include('layout/header') %>
+
+<div class="row align-items-center" style="min-height: 80vh;">
+    <div class="col-md-6 d-none d-md-block">
+        <h1 class="display-5 fw-bold" style="color: #1a73e8;">Swagat Verification</h1>
+        <p class="lead text-muted mt-3">An intelligent backend layer verifying grievance resolutions across departments, field officers, and citizens.</p>
+        <p class="text-muted"><small>Ensure authentic action is taken on every complaint.</small></p>
+    </div>
+    <div class="col-md-6 col-lg-5 offset-lg-1">
+        <div class="container-custom mt-0 border-0 shadow px-0 pt-0">
+            
+            <ul class="nav nav-tabs nav-justified" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active py-3 fw-bold" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button" role="tab">Login</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link py-3 fw-bold" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab">Register</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link py-3 fw-bold" id="test-tab" data-bs-toggle="tab" data-bs-target="#test" type="button" role="tab">Test Options</button>
+                </li>
+            </ul>
+            
+            <div class="tab-content p-4" id="myTabContent">
+                
+                <!-- LOGIN PANE -->
+                <div class="tab-pane fade show active" id="login" role="tabpanel">
+                    <h5 class="mb-4 text-center">Account Login</h5>
+                    <form action="#" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label text-muted fw-medium small">Username</label>
+                            <input type="text" class="form-control" name="username" placeholder="Enter username" disabled>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label text-muted fw-medium small">Password</label>
+                            <input type="password" class="form-control" name="password" placeholder="Enter password" disabled>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100" disabled>Sign In</button>
+                        <p class="text-center text-muted small mt-3">Auth system under construction. Use "Test Options".</p>
+                    </form>
+                </div>
+                
+                <!-- REGISTER PANE -->
+                <div class="tab-pane fade" id="register" role="tabpanel">
+                    <h5 class="mb-4 text-center">Create Account</h5>
+                    <form action="#" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label text-muted fw-medium small">Full Name</label>
+                            <input type="text" class="form-control" placeholder="Jane Doe" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted fw-medium small">Email / Phone</label>
+                            <input type="text" class="form-control" placeholder="jane@example.com" disabled>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label text-muted fw-medium small">Password</label>
+                            <input type="password" class="form-control" placeholder="Create password" disabled>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100" disabled>Register</button>
+                        <p class="text-center text-muted small mt-3">Auth system under construction. Use "Test Options".</p>
+                    </form>
+                </div>
+                
+                <!-- TEST OPTIONS PANE -->
+                <div class="tab-pane fade" id="test" role="tabpanel">
+                    <h5 class="mb-3 text-center">Developer Test Environment</h5>
+                    <p class="text-muted small text-center mb-4">Temporarily bypass authentication by selecting a pre-configured role from the dropdown below.</p>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Select Active Role</label>
+                        <select class="form-select form-select-lg" id="roleSelector" style="border-radius: 6px; border: 1px solid #1a73e8; color: #1a73e8; font-weight: 500;">
+                            <option value="/citizen">Citizen Dashboard</option>
+                            <option value="/department">Department Dashboard</option>
+                            <option value="#" disabled>Field Officer (Coming Soon)</option>
+                            <option value="#" disabled>Collector (Coming Soon)</option>
+                        </select>
+                    </div>
+                    
+                    <button type="button" class="btn btn-success w-100 py-2 fw-bold" onclick="launchDemoRole()">
+                        Continue as Selected Role &rarr;
+                    </button>
+                    
+                    <script>
+                        function launchDemoRole() {
+                            const selector = document.getElementById('roleSelector');
+                            const targetPath = selector.value;
+                            if (targetPath && targetPath !== '#') {
+                                window.location.href = targetPath;
+                            }
+                        }
+                    </script>
+                </div> <!-- END TEST PANE -->
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('layout/footer') %>

@@ -1,0 +1,43 @@
+<%- include('../layout/header') %>
+
+<div class="container-custom">
+    <div class="row mb-3 border-bottom pb-2">
+        <div class="col-md-8">
+            <h3>My Grievances (Citizen Dashboard)</h3>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="/citizen/new" class="btn btn-student">File New Complaint</a>
+        </div>
+    </div>
+
+    <% if (complaints && complaints.length > 0) { %>
+        <table class="table table-bordered table-striped mt-4">
+            <thead>
+                <tr>
+                    <th>Grievance ID</th>
+                    <th>Date Filed</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% complaints.forEach(complaint => { %>
+                    <tr>
+                        <td><%= complaint._id.toString().substring(0, 8) %></td>
+                        <td><%= new Date(complaint.createdAt).toLocaleDateString() %></td>
+                        <td><b><%= complaint.subject %></b></td>
+                        <td>
+                            <span class="badge-status badge-<%= complaint.status.replace(' ', '-') %>"><%= complaint.status %></span>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <div class="alert alert-info mt-4">
+            No complaints filed yet! Click 'File New Complaint' to start.
+        </div>
+    <% } %>
+</div>
+
+<%- include('../layout/footer') %>
