@@ -1,2 +1,6 @@
 node_modules/
 .env
+__pycache__/
+*.pkl
+public/uploads/*
+!public/uploads/.gitkeep

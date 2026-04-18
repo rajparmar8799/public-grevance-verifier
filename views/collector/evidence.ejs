@@ -1,0 +1,160 @@
+<%- include('../layout/header') %>
+
+<div class="hero-bg-mask" style="opacity: 0.1;"></div>
+
+<div class="relative z-10">
+    <div class="d-flex justify-content-between align-items-center mb-5 animate-fade-in">
+        <a href="/collector/dashboard" class="btn-zinc-outline p-2 px-3 d-flex align-items-center gap-2">
+            <i data-lucide="chevron-left" style="width: 16px;"></i> Back to Quality Feed
+        </a>
+        <div class="d-flex gap-2">
+            <button class="btn-zinc-outline d-flex align-items-center gap-2">
+                <i data-lucide="flag" style="width: 14px;"></i> Flag Report
+            </button>
+            <a href="/collector/evidence/<%= grievance._id %>/download" class="btn-zinc d-flex align-items-center gap-2 text-decoration-none">
+                <i data-lucide="download" style="width: 16px;"></i> Export Evidence Packet
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-8">
+            <div class="glass-card animate-fade-in delay-100">
+                <div class="d-flex justify-content-between align-items-start mb-5 pb-4 border-bottom border-white border-opacity-5">
+                    <div>
+                        <p class="text-zinc-500 small uppercase tracking-widest mb-1">Grievance Audit Record</p>
+                        <h2 class="fw-bold tracking-tighter mb-0">Record #<%= grievance._id.toString().substring(15) %></h2>
+                    </div>
+                    <div class="text-end">
+                        <div class="badge-zinc">
+                            <i data-lucide="activity" class="text-saffron" style="width: 12px;"></i>
+                            <%= grievance.status %>
+                        </div>
+                        <div class="text-zinc-500 small mt-2"><%= new Date(grievance.createdAt).toLocaleString() %></div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-5">
+                    <div class="col-sm-6">
+                        <p class="text-zinc-500 small uppercase tracking-widest mb-1">SUBJECT MATTER</p>
+                        <div class="fw-bold fs-5"><%= grievance.subject %></div>
+                    </div>
+                    <div class="col-sm-6">
+                        <p class="text-zinc-500 small uppercase tracking-widest mb-1">OWNER DEPARTMENT</p>
+                        <div class="fw-bold fs-5 text-zinc-300"><%= grievance.department %></div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-5">
+                    <div class="col-md-6">
+                        <div class="stats-card p-4 bg-zinc-900/50 rounded-4 border border-white border-opacity-5">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="small text-zinc-500 uppercase tracking-widest">AI Risk Index</span>
+                                <span class="fw-bold <%= grievance.verification.risk_score < 40 ? 'text-success' : 'text-danger' %>"><%= grievance.verification.risk_score %>%</span>
+                            </div>
+                            <div class="progress-zinc">
+                                <div class="progress-bar-zinc <%= grievance.verification.risk_score < 40 ? 'bg-success' : 'bg-danger' %>" style="width: <%= grievance.verification.risk_score %>%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="stats-card p-4 bg-zinc-900/50 rounded-4 border border-white border-opacity-5 text-center">
+                            <div class="small text-zinc-500 uppercase tracking-widest mb-1">Confidence Vector</div>
+                            <div class="h3 mb-0 fw-bold text-gradient"><%= (grievance.verification.confidence * 100).toFixed(0) %>%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h6 class="mb-4 d-flex align-items-center gap-2 text-zinc-400">
+                    <i data-lucide="shield-alert" style="width: 18px;"></i>
+                    Verification Audit Flags
+                </h6>
+                
+                <div class="space-y-3 mb-5">
+                    <% if(grievance.verification.flags && grievance.verification.flags.length > 0) { %>
+                        <% grievance.verification.flags.forEach(flag => { %>
+                            <div class="p-3 bg-zinc-900/30 rounded-3 border border-danger border-opacity-20 d-flex align-items-center mb-2">
+                                <i data-lucide="alert-triangle" class="text-danger me-3" style="width:18px;"></i>
+                                <span class="text-zinc-300 small fw-medium"><%= flag %></span>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="p-4 bg-success bg-opacity-5 rounded-4 border border-success border-opacity-10 d-flex align-items-center">
+                            <div class="p-2 rounded-circle bg-success bg-opacity-10 me-3">
+                                <i data-lucide="shield-check" class="text-success" style="width:24px; height:24px;"></i>
+                            </div>
+                            <div>
+                                <div class="text-success fw-bold">Anomaly Detection Passed</div>
+                                <div class="text-success small opacity-75">All evidence vectors align with verified ground truth data.</div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+
+                <div class="p-4 bg-zinc-900/70 rounded-4 border border-white border-opacity-5">
+                    <div class="small text-zinc-500 uppercase tracking-widest mb-3 font-monospace">Automated Insight Summary</div>
+                    <p class="mb-0 text-zinc-300 fs-6 leading-relaxed italic">"<%= grievance.verification.reason %>"</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="glass-card mb-4 animate-fade-in delay-200">
+                <h6 class="small text-zinc-500 uppercase tracking-widest mb-4">Photographic Proof</h6>
+                <% if(grievance.evidence.photo_url) { %>
+                    <div class="relative rounded-4 overflow-hidden mb-3 border border-white border-opacity-5">
+                       <img src="<%= grievance.evidence.photo_url %>" class="img-fluid w-100 grayscale hover:grayscale-0 transition-all duration-500">
+                    </div>
+                    <div class="space-y-3 pt-3 border-top border-white border-opacity-5">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-zinc-500 small">GIS INTEGRITY</span>
+                            <span class="badge-zinc <%= grievance.evidence.gps_match_flag ? 'text-success' : 'text-danger' %>">
+                                <%= grievance.evidence.gps_match_flag ? 'VERIFIED' : 'MISMATCH' %>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-zinc-500 small">DISTANCE VECTOR</span>
+                            <span class="text-white small fw-bold"><%= grievance.evidence.gps_distance_meters %> meters</span>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="text-center py-5 bg-zinc-900/50 rounded-4 border-dashed border-zinc-800">
+                        <i data-lucide="image-off" class="text-zinc-600 mb-2" style="width:32px; height:32px;"></i>
+                        <p class="text-zinc-600 small mb-0">No Visual Payload</p>
+                    </div>
+                <% } %>
+            </div>
+
+            <div class="glass-card mb-4 animate-fade-in delay-300" style="background: rgba(255,255,255,0.02);">
+                <h6 class="small text-zinc-500 uppercase tracking-widest mb-4 d-flex align-items-center gap-2">
+                    <i data-lucide="phone"></i> Voice Feedback Loop (IVR)
+                </h6>
+                <div class="space-y-3">
+                    <div class="d-flex justify-content-between align-items-center py-2 px-3 bg-zinc-950 rounded-3 border border-white border-opacity-5">
+                        <span class="text-zinc-500 small">CALL STATUS</span>
+                        <span class="small fw-bold"><%= grievance.evidence.ivr_call_status %></span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center py-2 px-3 bg-zinc-950 rounded-3 border border-white border-opacity-5">
+                        <span class="text-zinc-500 small">RESPONSE CODE</span>
+                        <span class="small fw-bold">
+                            <% if(grievance.evidence.ivr_response === 1) { %> <span class="text-success">Satisfied (1)</span>
+                            <% } else if(grievance.evidence.ivr_response === 2) { %> <span class="text-danger">Disputed (2)</span>
+                            <% } else { %> <span class="text-zinc-600">Pending</span> <% } %>
+                        </span>
+                    </div>
+                    <p class="text-zinc-600 mt-3 mb-0" style="font-size: 10px;">
+                        LOGGED: <%= grievance.evidence.ivr_called_at ? new Date(grievance.evidence.ivr_called_at).toLocaleString() : 'PENDING' %>
+                    </p>
+                </div>
+            </div>
+
+            <div class="glass-card text-center py-4 bg-white bg-opacity-5 animate-fade-in delay-400">
+                <i data-lucide="fingerprint" class="text-zinc-500 mb-2" style="width:24px; height:24px;"></i>
+                <div class="small text-zinc-500 uppercase tracking-widest mb-1" style="font-size: 8px;">Audit Integrity</div>
+                <div class="small fw-bold text-success" style="font-size: 10px;">CRYPTOGRAPHICALLY SECURED</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../layout/footer') %>

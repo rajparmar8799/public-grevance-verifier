@@ -1,26 +1,55 @@
 <%- include('../layout/header') %>
 
-<div class="login-box" style="max-width: 600px;">
-    <h3 class="border-bottom pb-2 mb-3">File New Complaint</h3>
-    <form action="/citizen/new" method="POST">
-        <div class="mb-3">
-            <label for="subject" class="form-label fw-bold">Subject:</label>
-            <input type="text" class="form-control" name="subject" id="subject" required>
-        </div>
-        
-        <div class="mb-3">
-            <label for="phoneNumber" class="form-label fw-bold">Mobile Number:</label>
-            <input type="text" class="form-control" name="phoneNumber" id="phoneNumber" placeholder="10 Digits" required>
-        </div>
+<div class="hero-bg-mask" style="opacity: 0.1;"></div>
 
-        <div class="mb-3">
-            <label for="description" class="form-label fw-bold">Description & Address:</label>
-            <textarea name="description" id="description" rows="4" class="form-control" required></textarea>
-        </div>
+<div class="row justify-content-center relative z-10">
+    <div class="col-md-7">
+        <div class="glass-card animate-fade-in">
+            <div class="d-flex align-items-center mb-5">
+                <a href="/citizen" class="btn-zinc-outline p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                    <i data-lucide="chevron-left"></i>
+                </a>
+                <div>
+                    <h3 class="mb-0 fw-bold tracking-tighter">Submit Grievance</h3>
+                    <p class="text-zinc-500 mb-0 small uppercase tracking-widest">New Entry</p>
+                </div>
+            </div>
+            
+            <form action="/citizen/new" method="POST" class="space-y-6">
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-zinc-400 ls-1">SUBJECT MATTER</label>
+                    <input type="text" class="form-control" name="subject" placeholder="Summarize the core issue" required>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-zinc-400 ls-1">DIRECT CONTACT (FOR CALL VERIFICATION)</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-zinc-900 text-zinc-500 border-0" style="border-radius: 12px 0 0 12px;">+91</span>
+                        <input type="text" class="form-control border-start-0" name="phoneNumber" placeholder="9876543210" style="border-radius: 0 12px 12px 0;" required>
+                    </div>
+                </div>
 
-        <button type="submit" class="btn btn-primary w-100 mt-2">Submit</button>
-        <a href="/citizen" class="text-center d-block mt-3">Back to Dashboard</a>
-    </form>
+                <div class="mb-5">
+                    <label class="form-label small fw-bold text-zinc-400 ls-1">DETAILED DESCRIPTION</label>
+                    <textarea class="form-control" name="description" rows="5" placeholder="Provide context, location details, and expected resolution..." required></textarea>
+                </div>
+
+                <div class="stats-card p-4 mb-5 border border-white border-opacity-5">
+                    <div class="d-flex align-items-center gap-3">
+                        <i data-lucide="shield-alert" class="text-saffron" style="width: 24px; height: 24px;"></i>
+                        <div class="small text-zinc-400 leading-relaxed">
+                            <span class="text-white fw-bold">Verification Policy:</span> An automated IVR call will be triggered upon resolution. Ensure the provided number is active for confirmation.
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-zinc w-100 py-3 d-flex align-items-center justify-content-center gap-2">
+                    Submit to Swagat Workspace
+                    <i data-lucide="send" style="width: 16px;"></i>
+                </button>
+            </form>
+        </div>
+    </div>
 </div>
 
 <%- include('../layout/footer') %>

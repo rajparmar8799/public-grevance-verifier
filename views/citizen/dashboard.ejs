@@ -1,43 +1,92 @@
 <%- include('../layout/header') %>
 
-<div class="container-custom">
-    <div class="row mb-3 border-bottom pb-2">
-        <div class="col-md-8">
-            <h3>My Grievances (Citizen Dashboard)</h3>
+<div class="hero-bg-mask" style="opacity: 0.15;"></div>
+
+<div class="relative z-10">
+    <div class="glass-card mb-4 d-flex justify-content-between align-items-center animate-fade-in">
+        <div>
+            <h2 class="mb-1 fw-bold tracking-tighter">Citizen Dashboard</h2>
+            <p class="text-zinc-500 mb-0 small">Track your active grievances and verification audits.</p>
         </div>
-        <div class="col-md-4 text-end">
-            <a href="/citizen/new" class="btn btn-student">File New Complaint</a>
+        <a href="/citizen/new" class="btn-zinc d-flex align-items-center btn-sm text-decoration-none" style="font-size: 0.8rem;">
+            <i data-lucide="plus-circle" class="me-2" style="width: 16px;"></i> File New Grievance
+        </a>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="glass-card stats-card text-center py-4 animate-fade-in delay-100">
+                <i data-lucide="inbox" class="text-saffron mb-2" style="width: 24px; height: 24px;"></i>
+                <div class="text-zinc-500 uppercase tracking-widest mb-1" style="font-size: 10px;">TOTAL FILED</div>
+                <h3 class="mb-0 fw-bold"><%= complaints.length %></h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card stats-card text-center py-4 animate-fade-in delay-200">
+                <i data-lucide="clock" class="text-warning mb-2" style="width: 24px; height: 24px;"></i>
+                <div class="text-zinc-500 uppercase tracking-widest mb-1" style="font-size: 10px;">PENDING</div>
+                <h3 class="mb-0 fw-bold"><%= complaints.filter(c => c.status === 'Pending').length %></h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card stats-card text-center py-4 animate-fade-in delay-300">
+                <i data-lucide="check-circle" class="text-success mb-2" style="width: 24px; height: 24px;"></i>
+                <div class="text-zinc-500 uppercase tracking-widest mb-1" style="font-size: 10px;">VERIFIED</div>
+                <h3 class="mb-0 fw-bold"><%= complaints.filter(c => ['VERIFIED', 'RESOLVED_PENDING_VERIFICATION'].includes(c.status)).length %></h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card stats-card text-center py-4 animate-fade-in delay-400">
+                <i data-lucide="alert-triangle" class="text-danger mb-2" style="width: 24px; height: 24px;"></i>
+                <div class="text-zinc-500 uppercase tracking-widest mb-1" style="font-size: 10px;">REOPENED</div>
+                <h3 class="mb-0 fw-bold"><%= complaints.filter(c => c.status === 'REOPENED').length %></h3>
+            </div>
         </div>
     </div>
 
-    <% if (complaints && complaints.length > 0) { %>
-        <table class="table table-bordered table-striped mt-4">
-            <thead>
-                <tr>
-                    <th>Grievance ID</th>
-                    <th>Date Filed</th>
-                    <th>Subject</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% complaints.forEach(complaint => { %>
+    <div class="glass-card p-0 overflow-hidden animate-fade-in delay-500">
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
                     <tr>
-                        <td><%= complaint._id.toString().substring(0, 8) %></td>
-                        <td><%= new Date(complaint.createdAt).toLocaleDateString() %></td>
-                        <td><b><%= complaint.subject %></b></td>
-                        <td>
-                            <span class="badge-status badge-<%= complaint.status.replace(' ', '-') %>"><%= complaint.status %></span>
-                        </td>
+                        <th class="ps-4">Reference</th>
+                        <th>Subject Details</th>
+                        <th>Status</th>
+                        <th class="pe-4 text-end">Timeline</th>
                     </tr>
-                <% }) %>
-            </tbody>
-        </table>
-    <% } else { %>
-        <div class="alert alert-info mt-4">
-            No complaints filed yet! Click 'File New Complaint' to start.
+                </thead>
+                <tbody>
+                    <% if(complaints.length > 0) { %>
+                        <% complaints.forEach(complaint => { %>
+                            <tr>
+                                <td class="ps-4"><code class="text-saffron">#<%= complaint._id.toString().substring(18) %></code></td>
+                                <td>
+                                    <div class="fw-bold mb-1"><%= complaint.subject %></div>
+                                    <div class="text-zinc-500 small"><%= complaint.description.substring(0, 60) %>...</div>
+                                </td>
+                                <td>
+                                    <span class="badge-zinc">
+                                        <i data-lucide="circle" class="fill-current <%= complaint.status === 'VERIFIED' ? 'text-success' : 'text-warning' %>" style="width: 8px;"></i>
+                                        <%= complaint.status %>
+                                    </span>
+                                </td>
+                                <td class="pe-4 text-end">
+                                    <div class="small fw-bold"><%= new Date(complaint.createdAt).toLocaleDateString() %></div>
+                                    <div class="text-zinc-500 small" style="font-size: 10px;">Filing Date</div>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="4" class="text-center py-5">
+                                <p class="text-zinc-500 mb-0">No records found in your workspace.</p>
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
         </div>
-    <% } %>
+    </div>
 </div>
 
 <%- include('../layout/footer') %>

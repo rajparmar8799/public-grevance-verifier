@@ -1,99 +1,194 @@
 <%- include('layout/header') %>
 
-<div class="row align-items-center" style="min-height: 80vh;">
-    <div class="col-md-6 d-none d-md-block">
-        <h1 class="display-5 fw-bold" style="color: #1a73e8;">Swagat Verification</h1>
-        <p class="lead text-muted mt-3">An intelligent backend layer verifying grievance resolutions across departments, field officers, and citizens.</p>
-        <p class="text-muted"><small>Ensure authentic action is taken on every complaint.</small></p>
-    </div>
-    <div class="col-md-6 col-lg-5 offset-lg-1">
-        <div class="container-custom mt-0 border-0 shadow px-0 pt-0">
+<div class="hero-bg-mask"></div>
+
+<div class="relative z-10 mx-auto max-w-7xl px-4 pt-20 pb-12 sm:px-6 md:pt-28 md:pb-20 lg:px-8">
+    <div class="row g-5">
+        
+        <!-- --- LEFT COLUMN --- -->
+        <div class="col-lg-7 d-flex flex-column justify-content-center">
             
-            <ul class="nav nav-tabs nav-justified" id="myTab" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active py-3 fw-bold" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button" role="tab">Login</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link py-3 fw-bold" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab">Register</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link py-3 fw-bold" id="test-tab" data-bs-toggle="tab" data-bs-target="#test" type="button" role="tab">Test Options</button>
-                </li>
-            </ul>
+            <!-- Badge -->
+            <div class="animate-fade-in delay-100 mb-4">
+                <div class="badge-zinc">
+                    Award-Winning Verification System
+                    <i data-lucide="star" class="text-warning fill-warning" style="width: 14px; height: 14px;"></i>
+                </div>
+            </div>
+
+            <!-- Heading -->
+            <h1 class="animate-fade-in delay-200 tracking-tighter leading-tight mb-4">
+                Crafting Civil <br />
+                <span class="text-gradient">Trust</span> <br />
+                Across Gujarat
+            </h1>
+
+            <!-- Description -->
+            <p class="animate-fade-in delay-300 max-w-xl text-lg text-zinc-400 leading-relaxed mb-5">
+                Integrating AI-assisted fraud detection and GIS-tagged evidence 
+                into the Swagat portal to ensure every resolution is authentic and effective.
+            </p>
+
+            <!-- CTA Buttons -->
+            <div class="animate-fade-in delay-400 d-flex flex-column flex-sm-row gap-4 mb-5">
+                <button class="btn-zinc d-flex align-items-center justify-content-center gap-2">
+                    Submit Grievance
+                    <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
+                </button>
+                
+                <button class="btn-zinc-outline d-flex align-items-center justify-content-center gap-2">
+                    <i data-lucide="play" class="fill-current" style="width: 16px; height: 16px;"></i>
+                    System Walkthrough
+                </button>
+            </div>
+
+            <!-- Trusted Marquee -->
+            <div class="animate-fade-in delay-500 mt-5 pt-4">
+                <h3 class="text-sm font-medium text-zinc-500 mb-4 uppercase tracking-widest">Integrating with Systems</h3>
+                
+                <div class="mask-edge overflow-hidden py-3">
+                    <div class="animate-marquee d-flex gap-5 whitespace-nowrap">
+                        <!-- Repeated items for loop -->
+                        <div class="d-flex align-items-center gap-2 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all cursor-default">
+                           <i data-lucide="shield-check" class="text-white"></i> <span class="fw-bold">Swagat v4.0</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all cursor-default mx-4">
+                            <i data-lucide="database" class="text-white"></i> <span class="fw-bold">MongoDB Cloud</span>
+                         </div>
+                         <div class="d-flex align-items-center gap-2 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all cursor-default mx-4">
+                            <i data-lucide="cpu" class="text-white"></i> <span class="fw-bold">RandomForest-ML</span>
+                         </div>
+                         <div class="d-flex align-items-center gap-2 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all cursor-default mx-4">
+                            <i data-lucide="map" class="text-white"></i> <span class="fw-bold">Gujarat GIS</span>
+                         </div>
+                         <!-- Repeat for loop -->
+                         <div class="d-flex align-items-center gap-2 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all cursor-default mx-4">
+                            <i data-lucide="shield-check" class="text-white"></i> <span class="fw-bold">Swagat v4.0</span>
+                         </div>
+                         <div class="d-flex align-items-center gap-2 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all cursor-default mx-4">
+                             <i data-lucide="database" class="text-white"></i> <span class="fw-bold">MongoDB Cloud</span>
+                          </div>
+                          <div class="d-flex align-items-center gap-2 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all cursor-default mx-4">
+                             <i data-lucide="cpu" class="text-white"></i> <span class="fw-bold">RandomForest-ML</span>
+                          </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- --- RIGHT COLUMN --- -->
+        <div class="col-lg-5">
             
-            <div class="tab-content p-4" id="myTabContent">
-                
-                <!-- LOGIN PANE -->
-                <div class="tab-pane fade show active" id="login" role="tabpanel">
-                    <h5 class="mb-4 text-center">Account Login</h5>
-                    <form action="#" method="POST">
-                        <div class="mb-3">
-                            <label class="form-label text-muted fw-medium small">Username</label>
-                            <input type="text" class="form-control" name="username" placeholder="Enter username" disabled>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label text-muted fw-medium small">Password</label>
-                            <input type="password" class="form-control" name="password" placeholder="Enter password" disabled>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100" disabled>Sign In</button>
-                        <p class="text-center text-muted small mt-3">Auth system under construction. Use "Test Options".</p>
-                    </form>
+            <!-- Stats Card -->
+            <div class="animate-fade-in delay-500 glass-card stats-card mb-4 p-5">
+                <div class="d-flex align-items-center gap-4 mb-5">
+                    <div class="d-flex align-items-center justify-content-center rounded-4 bg-white bg-opacity-10 ring-1 ring-white ring-opacity-10 shadow-sm" style="width: 56px; height: 56px;">
+                        <i data-lucide="target" class="text-white"></i>
+                    </div>
+                    <div>
+                        <div class="h2 fw-bold text-white mb-0">1.2K+</div>
+                        <div class="small text-zinc-500">Live Verifications</div>
+                    </div>
                 </div>
-                
-                <!-- REGISTER PANE -->
-                <div class="tab-pane fade" id="register" role="tabpanel">
-                    <h5 class="mb-4 text-center">Create Account</h5>
-                    <form action="#" method="POST">
-                        <div class="mb-3">
-                            <label class="form-label text-muted fw-medium small">Full Name</label>
-                            <input type="text" class="form-control" placeholder="Jane Doe" disabled>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label text-muted fw-medium small">Email / Phone</label>
-                            <input type="text" class="form-control" placeholder="jane@example.com" disabled>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label text-muted fw-medium small">Password</label>
-                            <input type="password" class="form-control" placeholder="Create password" disabled>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100" disabled>Register</button>
-                        <p class="text-center text-muted small mt-3">Auth system under construction. Use "Test Options".</p>
-                    </form>
+
+                <!-- Progress Section -->
+                <div class="mb-5">
+                    <div class="d-flex justify-content-between text-sm mb-2">
+                        <span class="text-zinc-500 small fw-bold">Verification Success Rate</span>
+                        <span class="text-white font-medium small">98.2%</span>
+                    </div>
+                    <div class="progress-zinc">
+                        <div class="progress-bar-zinc" style="width: 98%;"></div>
+                    </div>
                 </div>
+
+                <div class="h-px bg-white bg-opacity-5 mb-4" style="height: 1px;"></div>
+
+                <!-- Mini Stats Grid -->
+                <div class="row text-center mb-5">
+                    <div class="col">
+                        <div class="h5 fw-bold text-white mb-0">24/7</div>
+                        <div class="text-uppercase text-zinc-500" style="font-size: 8px; letter-spacing: 1px;">Audit</div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="bg-white bg-opacity-10" style="width: 1px; height: 100%;"></div>
+                    </div>
+                    <div class="col">
+                        <div class="h5 fw-bold text-white mb-0">ML</div>
+                        <div class="text-uppercase text-zinc-500" style="font-size: 8px; letter-spacing: 1px;">Powered</div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="bg-white bg-opacity-10" style="width: 1px; height: 100%;"></div>
+                    </div>
+                    <div class="col">
+                        <div class="h5 fw-bold text-white mb-0">100%</div>
+                        <div class="text-uppercase text-zinc-500" style="font-size: 8px; letter-spacing: 1px;">Authentic</div>
+                    </div>
+                </div>
+
+                <!-- Status Pills -->
+                <div class="d-flex gap-2">
+                    <div class="badge-zinc d-flex align-items-center gap-2">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+                        </span>
+                        Node Cluster Active
+                    </div>
+                    <div class="badge-zinc">
+                        <i data-lucide="crown" class="text-warning" style="width: 12px; height: 12px;"></i>
+                        Enterprise Scale
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login Tabs Card -->
+            <div class="animate-fade-in delay-500 glass-card p-0 overflow-hidden border-top-0">
+                <ul class="nav nav-tabs nav-justified" id="myTab" role="tablist" style="background: rgba(0,0,0,0.2);">
+                    <li class="nav-item">
+                        <button class="nav-link active py-3" id="demo-tab" data-bs-toggle="tab" data-bs-target="#demo" type="button" role="tab">Demo Access</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link py-3" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button" role="tab">Login</button>
+                    </li>
+                </ul>
                 
-                <!-- TEST OPTIONS PANE -->
-                <div class="tab-pane fade" id="test" role="tabpanel">
-                    <h5 class="mb-3 text-center">Developer Test Environment</h5>
-                    <p class="text-muted small text-center mb-4">Temporarily bypass authentication by selecting a pre-configured role from the dropdown below.</p>
-                    
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Select Active Role</label>
-                        <select class="form-select form-select-lg" id="roleSelector" style="border-radius: 6px; border: 1px solid #1a73e8; color: #1a73e8; font-weight: 500;">
+                <div class="tab-content p-4" id="myTabContent">
+                    <div class="tab-pane fade show active" id="demo" role="tabpanel">
+                        <label class="form-label small fw-bold text-zinc-500 mb-2">DEVELOPER PERSONA</label>
+                        <select class="form-select mb-4" id="roleSelector">
                             <option value="/citizen">Citizen Dashboard</option>
-                            <option value="/department">Department Dashboard</option>
-                            <option value="#" disabled>Field Officer (Coming Soon)</option>
-                            <option value="#" disabled>Collector (Coming Soon)</option>
+                            <option value="/department">Department Portal</option>
+                            <option value="/officer/dashboard">GIS Verification Officer</option>
+                            <option value="/collector/dashboard">District Quality Score</option>
                         </select>
+                        <button type="button" class="btn-zinc w-100 d-flex align-items-center justify-content-center gap-2" onclick="launchDemoRole()">
+                            Explore System
+                            <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
+                        </button>
                     </div>
                     
-                    <button type="button" class="btn btn-success w-100 py-2 fw-bold" onclick="launchDemoRole()">
-                        Continue as Selected Role &rarr;
-                    </button>
-                    
-                    <script>
-                        function launchDemoRole() {
-                            const selector = document.getElementById('roleSelector');
-                            const targetPath = selector.value;
-                            if (targetPath && targetPath !== '#') {
-                                window.location.href = targetPath;
-                            }
-                        }
-                    </script>
-                </div> <!-- END TEST PANE -->
-                
+                    <div class="tab-pane fade" id="login" role="tabpanel">
+                        <div class="mb-3">
+                            <input type="text" class="form-control" placeholder="Username" disabled>
+                        </div>
+                        <div class="mb-4">
+                            <input type="password" class="form-control" placeholder="••••••••" disabled>
+                        </div>
+                        <button class="btn-zinc-outline w-100" disabled>Secure Sign-in</button>
+                    </div>
+                </div>
             </div>
+
         </div>
     </div>
 </div>
+
+<script>
+    function launchDemoRole() {
+        const selector = document.getElementById('roleSelector');
+        window.location.href = selector.value;
+    }
+</script>
 
 <%- include('layout/footer') %>

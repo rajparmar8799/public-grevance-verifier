@@ -1,52 +1,77 @@
 <%- include('../layout/header') %>
 
-<div class="container-custom">
-    <h3>Department Dashboard</h3>
-    <p class="text-muted">Manage complaints and mark them resolved.</p>
+<div class="hero-bg-mask" style="opacity: 0.1;"></div>
 
-    <% if (complaints && complaints.length > 0) { %>
-        <table class="table table-bordered table-striped mt-3">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Date</th>
-                    <th>Subject & Description</th>
-                    <th>Contact</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% complaints.forEach(complaint => { %>
-                    <tr>
-                        <td><%= complaint._id.toString().substring(0, 8) %></td>
-                        <td><%= new Date(complaint.createdAt).toLocaleDateString() %></td>
-                        <td>
-                            <b><%= complaint.subject %></b><br>
-                            <small class="text-muted"><%= complaint.description %></small>
-                        </td>
-                        <td><%= complaint.phoneNumber %></td>
-                        <td>
-                            <span class="badge-status badge-<%= complaint.status.replace(' ', '-') %>"><%= complaint.status %></span>
-                        </td>
-                        <td>
-                            <% if(complaint.status === 'Pending' || complaint.status === 'Reopened') { %>
-                                <form action="/department/<%= complaint._id %>/resolve" method="POST" style="display:inline;">
-                                    <button type="submit" class="btn btn-sm btn-success">Mark Resolved</button>
-                                </form>
-                            <% } else { %>
-                                <button class="btn btn-sm btn-secondary" disabled>Resolved</button>
-                            <% } %>
-                        </td>
-                    </tr>
-                <% }) %>
-            </tbody>
-        </table>
-    <% } else { %>
-        <div class="alert alert-info mt-4">
-            No complaints available.
+<div class="relative z-10">
+    <div class="glass-card mb-4 d-flex justify-content-between align-items-center animate-fade-in">
+        <div>
+            <h2 class="mb-1 fw-bold tracking-tighter">Department Portal</h2>
+            <p class="text-zinc-500 mb-0 small uppercase tracking-widest">Active Resolution Queue</p>
         </div>
-    <% } %>
+        <div class="badge-zinc">
+            <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+            </span>
+            Connected: District HQ
+        </div>
+    </div>
+
+    <div class="glass-card p-0 overflow-hidden animate-fade-in delay-200">
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Ref</th>
+                        <th>Issue Summary</th>
+                        <th>Citizen Contact</th>
+                        <th>Workflow State</th>
+                        <th class="pe-4 text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (complaints && complaints.length > 0) { %>
+                        <% complaints.forEach(complaint => { %>
+                            <tr>
+                                <td class="ps-4"><small class="text-zinc-500 font-monospace">#<%= complaint._id.toString().substring(18) %></small></td>
+                                <td>
+                                    <div class="fw-bold mb-1"><%= complaint.subject %></div>
+                                    <div class="text-zinc-500 small" style="max-width:400px;"><%= complaint.description.substring(0, 80) %>...</div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i data-lucide="phone" style="width: 14px; color: var(--zinc-500);"></i>
+                                        <span class="small"><%= complaint.phoneNumber %></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge-zinc">
+                                        <i data-lucide="activity" class="text-saffron" style="width: 10px;"></i>
+                                        <%= complaint.status %>
+                                    </span>
+                                </td>
+                                <td class="pe-4 text-end">
+                                    <% if(['Pending', 'Reopened', 'FAILED'].includes(complaint.status)) { %>
+                                        <form action="/department/<%= complaint._id %>/resolve" method="POST" style="display:inline;">
+                                            <button type="submit" class="btn-zinc btn-sm py-2 px-3 d-inline-flex align-items-center gap-2" style="font-size: 0.75rem;">
+                                                <i data-lucide="check-circle-2" style="width: 14px;"></i> Mark Resolved
+                                            </button>
+                                        </form>
+                                    <% } else { %>
+                                        <div class="text-zinc-500 small d-inline-flex align-items-center gap-1">
+                                            <i data-lucide="lock" style="width: 12px;"></i> Locked
+                                        </div>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr><td colspan="5" class="text-center py-5 text-zinc-500">Workspace is empty. No active grievances.</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <%- include('../layout/footer') %>

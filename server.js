@@ -11,6 +11,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Mock Session to support prompted code
+app.use((req, res, next) => {
+    if(!req.session) req.session = {};
+    req.session.user = { _id: new mongoose.Types.ObjectId() };
+    next();
+});
+
 // View Engine setup
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -24,10 +31,17 @@ mongoose.connect(process.env.MONGO_URI)
 const indexRoutes = require('./routes/indexRoutes');
 const citizenRoutes = require('./routes/citizenRoutes');
 const departmentRoutes = require('./routes/departmentRoutes');
+const fieldOfficerRoutes = require('./routes/fieldOfficerRoutes');
+const collectorRoutes = require('./routes/collectorRoutes');
 
 app.use('/', indexRoutes);
 app.use('/citizen', citizenRoutes);
 app.use('/department', departmentRoutes);
+app.use('/', fieldOfficerRoutes);
+app.use('/', collectorRoutes);
+
+// Serve uploads
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

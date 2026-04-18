@@ -1,0 +1,139 @@
+<%- include('../layout/header') %>
+
+<div class="hero-bg-mask" style="opacity: 0.1;"></div>
+
+<div class="relative z-10">
+    <div class="glass-card mb-5 d-flex justify-content-between align-items-center animate-fade-in">
+        <div>
+            <h1 class="mb-1 fw-bold tracking-tighter">District Quality Score</h1>
+            <p class="text-zinc-500 mb-0 small uppercase tracking-widest">Global Audit Feed</p>
+        </div>
+        <div class="badge-zinc">
+            <i data-lucide="shield-check" class="text-success" style="width: 14px;"></i>
+            Enterprise Verification Mode
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="glass-card stats-card text-center py-4 animate-fade-in delay-100">
+                <div class="text-zinc-500 small mb-2 uppercase tracking-widest">TOTAL RESOLVED</div>
+                <h2 class="mb-0 fw-bold tracking-tighter"><%= stats.total %></h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card stats-card text-center py-4 animate-fade-in delay-200" style="border-bottom: 3px solid var(--accent-gold);">
+                <div class="text-zinc-500 small mb-2 uppercase tracking-widest">AI VERIFIED</div>
+                <h2 class="mb-0 fw-bold tracking-tighter text-gradient"><%= stats.verified %></h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card stats-card text-center py-4 animate-fade-in delay-300">
+                <div class="text-zinc-500 small mb-2 uppercase tracking-widest">DISPUTED/REOPENED</div>
+                <h2 class="mb-0 fw-bold tracking-tighter text-danger"><%= stats.reopened %></h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card stats-card text-center py-4 animate-fade-in delay-400">
+                <div class="text-zinc-500 small mb-2 uppercase tracking-widest">AVG QUALITY SCORE</div>
+                <h2 class="mb-0 fw-bold tracking-tighter"><%= stats.avgScore %>%</h2>
+            </div>
+        </div>
+    </div>
+
+    <h5 class="mb-4 d-flex align-items-center gap-2 animate-fade-in delay-500">
+        <i data-lucide="bar-chart-3" class="text-saffron" style="width: 20px;"></i>
+        <span class="fw-bold tracking-tighter">Department Performance Index</span>
+    </h5>
+    <div class="glass-card p-0 overflow-hidden mb-5 animate-fade-in delay-500">
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">DEPT / DISTRICT</th>
+                        <th>VOLUME</th>
+                        <th class="text-center">V-STATUS</th>
+                        <th class="pe-4">QUALITY BAND</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if(scores.length > 0) { %>
+                        <% scores.forEach(s => { %>
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold"><%= s.department %></div>
+                                    <div class="small text-zinc-500"><%= s.district %></div>
+                                </td>
+                                <td><%= s.total_resolved %> <small class="text-zinc-500">filed</small></td>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-3">
+                                        <div class="small"><span class="text-success fw-bold"><%= s.verified_count %></span> <span class="text-zinc-500">V</span></div>
+                                        <div class="small"><span class="text-danger fw-bold"><%= s.failed_count + s.reopened_count %></span> <span class="text-zinc-500">F</span></div>
+                                    </div>
+                                </td>
+                                <td class="pe-4" style="min-width: 240px;">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="progress-zinc flex-grow-1">
+                                            <div class="progress-bar-zinc" style="width: <%= s.quality_score %>%"></div>
+                                        </div>
+                                        <span class="small fw-bold font-monospace"><%= s.quality_score %>%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr><td colspan="4" class="text-center py-5">System initialization pending. No data available.</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <h5 class="mb-4 d-flex align-items-center gap-2 animate-fade-in delay-500">
+        <i data-lucide="cpu" class="text-saffron" style="width: 20px;"></i>
+        <span class="fw-bold tracking-tighter">Live Verification Stream (ML Insights)</span>
+    </h5>
+    <div class="glass-card p-0 overflow-hidden animate-fade-in delay-500">
+        <div class="table-responsive">
+            <table class="table mb-0 table-sm align-middle">
+                <thead>
+                    <tr>
+                        <th class="ps-4 text-xs">Reference</th>
+                        <th class="text-xs">State</th>
+                        <th class="text-xs">Risk Index</th>
+                        <th class="text-xs">Reasoning Vector</th>
+                        <th class="pe-4 text-end text-xs">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% recentVerifications.forEach(g => { %>
+                        <tr style="background: rgba(255,255,255,0.01);">
+                            <td class="ps-4"><small class="text-zinc-500">#<%= g._id.toString().substring(18) %></small></td>
+                            <td>
+                                <span class="badge-zinc" style="font-size: 8px;">
+                                    <%= g.status %>
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress-zinc" style="width: 40px; height: 4px;">
+                                        <div class="progress-bar-zinc <%= g.verification.risk_score > 50 ? 'bg-danger' : '' %>" style="width: <%= g.verification.risk_score %>%"></div>
+                                    </div>
+                                    <span class="small fw-bold <%= g.verification.risk_score > 50 ? 'text-danger' : 'text-zinc-300' %>"><%= g.verification.risk_score %>%</span>
+                                </div>
+                            </td>
+                            <td><small class="text-zinc-500 d-block text-truncate" style="max-width:250px;"><%= g.verification.reason %></small></td>
+                            <td class="pe-4 text-end">
+                                <a href="/collector/evidence/<%= g._id %>" class="btn-zinc-outline py-1 px-3 d-inline-flex align-items-center gap-2" style="font-size: 10px;">
+                                    Audit Packet
+                                </a>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<%- include('../layout/footer') %>
