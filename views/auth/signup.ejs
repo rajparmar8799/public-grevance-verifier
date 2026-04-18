@@ -1,0 +1,61 @@
+<%- include('../layout/header') %>
+
+<div class="hero-bg-mask" style="opacity: 0.12;"></div>
+
+<div class="row justify-content-center relative z-10">
+    <div class="col-lg-8 col-xl-7">
+        <div class="glass-card p-4 p-md-5 animate-fade-in">
+            <h2 class="fw-bold tracking-tighter mb-2">Create Account</h2>
+            <p class="text-zinc-500 mb-4">Citizen accounts are auto-approved. Officer accounts require approval workflow.</p>
+
+            <% if (error) { %>
+                <div class="alert alert-danger"><%= error %></div>
+            <% } %>
+            <% if (message) { %>
+                <div class="alert alert-success"><%= message %></div>
+            <% } %>
+
+            <form method="POST" action="/auth/signup">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="name" class="form-label small fw-bold text-zinc-400 mb-2">Full Name</label>
+                        <input id="name" name="name" type="text" class="form-control" placeholder="Your full name" value="<%= values.name %>" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="email" class="form-label small fw-bold text-zinc-400 mb-2">Email Address</label>
+                        <input id="email" name="email" type="email" class="form-control" placeholder="name@example.com" value="<%= values.email %>" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="password" class="form-label small fw-bold text-zinc-400 mb-2">Password</label>
+                        <input id="password" name="password" type="password" class="form-control" placeholder="Minimum 8 characters" required>
+                        <div class="small text-zinc-500 mt-1">Must contain: uppercase, lowercase, number, special character</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="role" class="form-label small fw-bold text-zinc-400 mb-2">Role</label>
+                        <select id="role" name="role" class="form-select" required>
+                            <option value="citizen" <%= values.role === 'citizen' ? 'selected' : '' %>>Citizen</option>
+                            <option value="field_officer" <%= values.role === 'field_officer' ? 'selected' : '' %>>Field Officer</option>
+                            <option value="department_officer" <%= values.role === 'department_officer' ? 'selected' : '' %>>Department Officer</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="district" class="form-label small fw-bold text-zinc-400 mb-2">District</label>
+                        <input id="district" name="district" type="text" class="form-control" placeholder="e.g., Ahmedabad" value="<%= values.district %>">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="department" class="form-label small fw-bold text-zinc-400 mb-2">Department</label>
+                        <input id="department" name="department" type="text" class="form-control" placeholder="e.g., Water Supply" value="<%= values.department %>">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-zinc w-100 mt-4 py-2 fw-bold">Create Account</button>
+            </form>
+
+            <p class="small text-zinc-500 mt-4 mb-0 text-center">
+                Already registered? <a href="/auth/login" class="text-decoration-none" style="color: var(--accent-gold);">Sign in here</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<%- include('../layout/footer') %>

@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Complaint = require('../models/Complaint');
+const { requireRoleAndApproved } = require('../middleware/authMiddleware');
+
+router.use(requireRoleAndApproved(['citizen']));
 
 // Citizen Dashboard - View old complaints and statuses
 router.get('/', async (req, res) => {

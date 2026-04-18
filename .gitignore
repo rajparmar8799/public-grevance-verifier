@@ -1,6 +1,12 @@
 node_modules/
 .env
-__pycache__/
-*.pkl
-public/uploads/*
-!public/uploads/.gitkeep
+.env.*
+uploads/
+public/uploads/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db
+nul

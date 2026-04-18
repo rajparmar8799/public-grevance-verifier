@@ -31,15 +31,15 @@
 
             <!-- CTA Buttons -->
             <div class="animate-fade-in delay-400 d-flex flex-column flex-sm-row gap-4 mb-5">
-                <button class="btn-zinc d-flex align-items-center justify-content-center gap-2">
+                <a href="/citizen/new" class="btn-zinc d-flex align-items-center justify-content-center gap-2 text-decoration-none">
                     Submit Grievance
                     <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
-                </button>
+                </a>
                 
-                <button class="btn-zinc-outline d-flex align-items-center justify-content-center gap-2">
+                <a href="/auth/login?demo=1" class="btn-zinc-outline d-flex align-items-center justify-content-center gap-2 text-decoration-none">
                     <i data-lucide="play" class="fill-current" style="width: 16px; height: 16px;"></i>
                     System Walkthrough
-                </button>
+                </a>
             </div>
 
             <!-- Trusted Marquee -->
@@ -157,10 +157,10 @@
                     <div class="tab-pane fade show active" id="demo" role="tabpanel">
                         <label class="form-label small fw-bold text-zinc-500 mb-2">DEVELOPER PERSONA</label>
                         <select class="form-select mb-4" id="roleSelector">
-                            <option value="/citizen">Citizen Dashboard</option>
-                            <option value="/department">Department Portal</option>
-                            <option value="/officer/dashboard">GIS Verification Officer</option>
-                            <option value="/collector/dashboard">District Quality Score</option>
+                            <option value="citizen">Citizen Dashboard</option>
+                            <option value="department_officer">Department Portal</option>
+                            <option value="field_officer">GIS Verification Officer</option>
+                            <option value="collector">District Quality Score</option>
                         </select>
                         <button type="button" class="btn-zinc w-100 d-flex align-items-center justify-content-center gap-2" onclick="launchDemoRole()">
                             Explore System
@@ -187,7 +187,8 @@
 <script>
     function launchDemoRole() {
         const selector = document.getElementById('roleSelector');
-        window.location.href = selector.value;
+        const role = selector.value;
+        window.location.href = `/auth/login?role=${encodeURIComponent(role)}&demo=1`;
     }
 </script>
 

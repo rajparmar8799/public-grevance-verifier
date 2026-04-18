@@ -3,6 +3,19 @@
 <div class="hero-bg-mask" style="opacity: 0.1;"></div>
 
 <div class="relative z-10">
+    <% if (error) { %>
+        <div class="alert alert-danger"><%= error %></div>
+    <% } %>
+    <% if (message) { %>
+        <div class="alert alert-success"><%= message %></div>
+    <% } %>
+    <% if (message && message.toLowerCase().includes('evidence submitted')) { %>
+        <div class="alert alert-info d-flex align-items-center gap-2">
+            <i data-lucide="info" style="width:16px;"></i>
+            Submitted evidence moves to verification, so it may disappear from this queue.
+        </div>
+    <% } %>
+
     <div class="glass-card mb-4 d-flex justify-content-between align-items-center animate-fade-in">
         <div>
             <h2 class="mb-1 fw-bold tracking-tighter">Field GIS Portal</h2>
@@ -79,49 +92,13 @@
                                 </td>
                                 <td class="pe-4 text-end">
                                     <button class="btn-zinc btn-sm py-2 px-4 d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modal-<%= complaint._id %>">
-                                        <i data-lucide="shield-check" style="width: 14px;"></i> Perform Audit
+                                        <i data-lucide="shield-check" style="width: 14px;"></i> Perform Evidence
                                     </button>
-                                    
-                                    <!-- Modal -->
-                                    <div class="modal fade" id="modal-<%= complaint._id %>" tabindex="-1">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content glass-card p-0 border-0 overflow-hidden" style="background: var(--zinc-950);">
-                                                <div class="modal-header border-0 p-5 pb-0">
-                                                    <h3 class="modal-title fw-bold tracking-tighter">Submit Evidence</h3>
-                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <div class="modal-body p-5">
-                                                    <form action="/officer/evidence/<%= complaint._id %>/submit" method="POST" enctype="multipart/form-data">
-                                                        <div class="mb-5 text-center p-5 bg-zinc-900 rounded-4 border-dashed border-zinc-800 transition-all hover:bg-zinc-800/50 cursor-pointer">
-                                                            <i data-lucide="camera" class="d-block mx-auto mb-3 text-zinc-500" style="width:48px; height:48px;"></i>
-                                                            <div class="fw-bold mb-1">Click to Upload Resolution Proof</div>
-                                                            <p class="text-zinc-500 small mb-0">High-resolution JPEG or PNG only</p>
-                                                            <input type="file" name="photo" accept="image/*" class="form-control mt-4 bg-zinc-950 border-zinc-800" required>
-                                                        </div>
-
-                                                        <div class="mb-5">
-                                                            <label class="form-label small fw-bold text-zinc-500 mb-3 tracking-widest">POSITION VALIDATION</label>
-                                                            <button type="button" class="btn-zinc-outline w-100 detectGPS py-3 d-flex align-items-center justify-content-center gap-2" data-target="<%= complaint._id %>">
-                                                                <i data-lucide="target"></i> Acquire Current Coordinates
-                                                            </button>
-                                                            <div id="gps-display-<%= complaint._id %>" class="mt-3 text-center small text-zinc-500 font-monospace">Waiting for Signal...</div>
-                                                            <input type="hidden" name="lat" id="lat-<%= complaint._id %>">
-                                                            <input type="hidden" name="lng" id="lng-<%= complaint._id %>">
-                                                        </div>
-
-                                                        <button type="submit" class="btn-zinc w-100 py-3 fw-bold">
-                                                            Secure Payload & Submit
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </td>
                             </tr>
                         <% }) %>
                     <% } else { %>
-                        <tr><td colspan="4" class="text-center py-5 text-zinc-500">Pipeline cleared. Standby for new assignments.</td></tr>
+                        <tr><td colspan="4" class="text-center py-5 text-zinc-500">Pipeline cleared. Submitted items move to verification review.</td></tr>
                     <% } %>
                 </tbody>
             </table>
@@ -129,30 +106,144 @@
     </div>
 </div>
 
+<% complaints.forEach(complaint => { %>
+    <div class="modal fade evidence-modal" id="modal-<%= complaint._id %>" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content glass-card p-0 border-0 overflow-hidden" style="background: var(--zinc-950);">
+                <div class="modal-header border-0 p-5 pb-0">
+                    <div>
+                        <h3 class="modal-title fw-bold tracking-tighter mb-1">Submit Evidence</h3>
+                        <p class="small text-zinc-500 mb-0">Complaint ID #<%= complaint._id.toString().substring(18) %></p>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close evidence modal"></button>
+                </div>
+                <div class="modal-body p-5 pt-4">
+                    <form class="evidence-form" action="/officer/evidence/<%= complaint._id %>/submit" method="POST" enctype="multipart/form-data" novalidate>
+                        <div class="mb-5 text-center p-5 bg-zinc-900 rounded-4 border-dashed border-zinc-800 transition-all hover:bg-zinc-800/50 cursor-pointer evidence-upload-card">
+                            <i data-lucide="camera" class="d-block mx-auto mb-3 text-zinc-500" style="width:48px; height:48px;"></i>
+                            <div class="fw-bold mb-1">Click to Upload Resolution Proof</div>
+                            <p class="text-zinc-500 small mb-0">High-resolution JPEG, PNG, or WebP only</p>
+                            <input type="file" name="photo" accept="image/png,image/jpeg,image/webp" class="form-control mt-4 bg-zinc-950 border-zinc-800 evidence-photo-input" required>
+                            <div class="small text-zinc-500 mt-2 evidence-file-name">No file selected</div>
+                        </div>
+
+                        <div class="mb-5">
+                            <label class="form-label small fw-bold text-zinc-500 mb-3 tracking-widest">POSITION VALIDATION</label>
+                            <button type="button" class="btn-zinc-outline w-100 detectGPS py-3 d-flex align-items-center justify-content-center gap-2" data-target="<%= complaint._id %>">
+                                <i data-lucide="target"></i> Acquire Current Coordinates
+                            </button>
+                            <div id="gps-display-<%= complaint._id %>" class="mt-3 text-center small text-zinc-500 font-monospace">Waiting for Signal...</div>
+                            <div class="small text-zinc-500 mt-2 text-center">GPS is optional, but recommended for faster verification.</div>
+                            <input type="hidden" name="lat" id="lat-<%= complaint._id %>">
+                            <input type="hidden" name="lng" id="lng-<%= complaint._id %>">
+                        </div>
+
+                        <button type="submit" class="btn-zinc w-100 py-3 fw-bold evidence-submit-btn d-flex align-items-center justify-content-center gap-2">
+                            <span class="submit-label">Secure Payload & Submit</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+<% }) %>
+
 <script>
-document.querySelectorAll('.detectGPS').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const id = this.getAttribute('data-target');
-        this.textContent = 'Acquiring Signal...';
-        navigator.geolocation.getCurrentPosition(
-            pos => {
-                document.getElementById('lat-' + id).value = pos.coords.latitude;
-                document.getElementById('lng-' + id).value = pos.coords.longitude;
-                const display = document.getElementById('gps-display-' + id);
-                display.innerHTML = `<span class="text-success fw-bold">SIGNAL LOCKED: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}</span>`;
-                this.innerHTML = '<i data-lucide="check" class="me-2"></i> Signal Acquired';
-                this.classList.replace('btn-zinc-outline', 'btn-zinc');
-                lucide.createIcons();
-            },
-            err => {
-                const display = document.getElementById('gps-display-' + id);
-                display.textContent = 'SIGNAL FAILED: Enable GPS/Location Access.';
-                display.className = 'mt-3 text-danger small font-monospace';
-                this.innerHTML = '<i data-lucide="refresh-cw" class="me-2"></i> Retry Acquisition';
-                lucide.createIcons();
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.detectGPS').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-target');
+            const display = document.getElementById('gps-display-' + id);
+
+            if (!navigator.geolocation) {
+                if (display) {
+                    display.textContent = 'SIGNAL FAILED: Geolocation is not supported in this browser.';
+                    display.className = 'mt-3 text-danger small font-monospace';
+                }
+                return;
             }
-        );
+
+            this.disabled = true;
+            this.innerHTML = '<i data-lucide="loader-circle" class="me-2"></i> Acquiring Signal...';
+            lucide.createIcons();
+
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    const latInput = document.getElementById('lat-' + id);
+                    const lngInput = document.getElementById('lng-' + id);
+
+                    if (latInput) {
+                        latInput.value = pos.coords.latitude;
+                    }
+                    if (lngInput) {
+                        lngInput.value = pos.coords.longitude;
+                    }
+                    if (display) {
+                        display.innerHTML = `<span class="text-success fw-bold">SIGNAL LOCKED: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}</span>`;
+                    }
+
+                    this.innerHTML = '<i data-lucide="check" class="me-2"></i> Signal Acquired';
+                    this.classList.replace('btn-zinc-outline', 'btn-zinc');
+                    this.disabled = false;
+                    lucide.createIcons();
+                },
+                () => {
+                    if (display) {
+                        display.textContent = 'SIGNAL FAILED: Enable GPS/Location Access or retry.';
+                        display.className = 'mt-3 text-danger small font-monospace';
+                    }
+                    this.innerHTML = '<i data-lucide="refresh-cw" class="me-2"></i> Retry Acquisition';
+                    this.disabled = false;
+                    this.classList.add('btn-zinc-outline');
+                    this.classList.remove('btn-zinc');
+                    lucide.createIcons();
+                }
+            );
+        });
     });
+
+    document.querySelectorAll('.evidence-photo-input').forEach(input => {
+        input.addEventListener('change', function() {
+            const uploadCard = this.closest('.evidence-upload-card');
+            const fileNameNode = uploadCard ? uploadCard.querySelector('.evidence-file-name') : null;
+            const selected = this.files && this.files[0] ? this.files[0].name : 'No file selected';
+            if (fileNameNode) {
+                fileNameNode.textContent = selected;
+            }
+        });
+    });
+
+    document.querySelectorAll('.evidence-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            const photoInput = this.querySelector('.evidence-photo-input');
+            const submitBtn = this.querySelector('.evidence-submit-btn');
+            const label = this.querySelector('.submit-label');
+
+            if (!photoInput || !photoInput.files || !photoInput.files.length) {
+                event.preventDefault();
+                showEvidenceError(this, 'Please attach an evidence image before submitting.');
+                return;
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-75');
+            }
+            if (label) {
+                label.textContent = 'Uploading Evidence...';
+            }
+        });
+    });
+
+    function showEvidenceError(form, message) {
+        let alertNode = form.querySelector('.evidence-form-alert');
+        if (!alertNode) {
+            alertNode = document.createElement('div');
+            alertNode.className = 'alert alert-danger evidence-form-alert mt-4 mb-0';
+            form.prepend(alertNode);
+        }
+        alertNode.textContent = message;
+    }
 });
 </script>
 

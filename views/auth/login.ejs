@@ -1,0 +1,113 @@
+<%- include('../layout/header') %>
+
+<div class="hero-bg-mask" style="opacity: 0.12;"></div>
+
+<div class="row justify-content-center relative z-10">
+	<div class="col-lg-7 col-xl-6">
+		<div class="glass-card p-4 p-md-5 animate-fade-in">
+			<h2 class="fw-bold tracking-tighter mb-2">Role-Based Login</h2>
+			<p class="text-zinc-500 mb-4">Select your portal role, then sign in with email and password.</p>
+			<% if (demoMode) { %>
+				<div class="alert alert-info">Demo mode: credentials auto-filled for the selected role.</div>
+			<% } %>
+
+			<% if (error) { %>
+				<div class="alert alert-danger"><%= error %></div>
+			<% } %>
+			<% if (message) { %>
+				<div class="alert alert-success"><%= message %></div>
+			<% } %>
+
+			<div class="mb-4">
+				<label class="form-label small fw-bold text-zinc-500 mb-2">SELECT ROLE</label>
+				<div class="row g-2" id="roleButtons">
+					<div class="col-6 col-md-3">
+						<button type="button" class="btn btn-outline-light w-100 role-btn" data-role="citizen">Citizen</button>
+					</div>
+					<div class="col-6 col-md-3">
+						<button type="button" class="btn btn-outline-light w-100 role-btn" data-role="field_officer">Field Officer</button>
+					</div>
+					<div class="col-6 col-md-3">
+						<button type="button" class="btn btn-outline-light w-100 role-btn" data-role="department_officer">Department Officer</button>
+					</div>
+					<div class="col-6 col-md-3">
+						<button type="button" class="btn btn-outline-light w-100 role-btn" data-role="collector">Collector</button>
+					</div>
+				</div>
+			</div>
+
+			<form method="POST" action="/auth/login">
+				<input type="hidden" id="selectedRole" name="role" value="<%= selectedRole %>">
+
+				<div class="mb-3">
+					<label for="email" class="form-label small fw-bold text-zinc-400 mb-2">Email Address</label>
+					<input id="email" name="email" type="email" class="form-control" placeholder="name@example.com" required>
+				</div>
+				<div class="mb-4">
+					<label for="password" class="form-label small fw-bold text-zinc-400 mb-2">Password</label>
+					<input id="password" name="password" type="password" class="form-control" placeholder="Enter your password" required>
+				</div>
+
+				<button type="submit" class="btn-zinc w-100 py-2 fw-bold">Sign In</button>
+			</form>
+
+			<p class="small text-zinc-500 mt-4 mb-0 text-center">
+				New to Swagat? <a href="/auth/signup" class="text-decoration-none" style="color: var(--accent-gold);">Create an account</a>
+			</p>
+		</div>
+	</div>
+</div>
+
+<script>
+	(function initRoleSelector() {
+		const hiddenInput = document.getElementById('selectedRole');
+		const emailInput = document.getElementById('email');
+		const passwordInput = document.getElementById('password');
+		const roleButtons = document.querySelectorAll('.role-btn');
+		const isDemoMode = <%= demoMode ? 'true' : 'false' %>;
+		const demoCredentials = {
+			citizen: {
+				email: 'citizen.demo@swagat.local',
+				password: 'Citizen@123'
+			},
+			field_officer: {
+				email: 'field.demo@swagat.local',
+				password: 'Field@123'
+			},
+			department_officer: {
+				email: 'department.demo@swagat.local',
+				password: 'Department@123'
+			},
+			collector: {
+				email: 'collector.demo@swagat.local',
+				password: 'Collector@123'
+			}
+		};
+
+		function applySelectedRole(role) {
+			hiddenInput.value = role;
+			roleButtons.forEach(btn => {
+				if (btn.dataset.role === role) {
+					btn.classList.remove('btn-outline-light');
+					btn.classList.add('btn-zinc');
+				} else {
+					btn.classList.remove('btn-zinc');
+					btn.classList.add('btn-outline-light');
+				}
+			});
+
+			if (isDemoMode && demoCredentials[role]) {
+				emailInput.value = demoCredentials[role].email;
+				passwordInput.value = demoCredentials[role].password;
+			}
+		}
+
+		roleButtons.forEach(btn => {
+			btn.addEventListener('click', () => applySelectedRole(btn.dataset.role));
+		});
+
+		applySelectedRole(hiddenInput.value || 'citizen');
+	})();
+</script>
+
+<%- include('../layout/footer') %>

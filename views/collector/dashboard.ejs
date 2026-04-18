@@ -3,6 +3,13 @@
 <div class="hero-bg-mask" style="opacity: 0.1;"></div>
 
 <div class="relative z-10">
+    <% if (error) { %>
+        <div class="alert alert-danger"><%= error %></div>
+    <% } %>
+    <% if (message) { %>
+        <div class="alert alert-success"><%= message %></div>
+    <% } %>
+
     <div class="glass-card mb-5 d-flex justify-content-between align-items-center animate-fade-in">
         <div>
             <h1 class="mb-1 fw-bold tracking-tighter">District Quality Score</h1>
@@ -38,6 +45,52 @@
                 <div class="text-zinc-500 small mb-2 uppercase tracking-widest">AVG QUALITY SCORE</div>
                 <h2 class="mb-0 fw-bold tracking-tighter"><%= stats.avgScore %>%</h2>
             </div>
+        </div>
+    </div>
+
+    <h5 class="mb-4 d-flex align-items-center gap-2 animate-fade-in delay-500">
+        <i data-lucide="user-check" class="text-saffron" style="width: 20px;"></i>
+        <span class="fw-bold tracking-tighter">Pending Account Approvals</span>
+    </h5>
+    <div class="glass-card p-0 overflow-hidden mb-5 animate-fade-in delay-500">
+        <div class="table-responsive">
+            <table class="table mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>District</th>
+                        <th class="pe-4 text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (pendingApprovals && pendingApprovals.length > 0) { %>
+                        <% pendingApprovals.forEach(user => { %>
+                            <tr>
+                                <td class="ps-4 fw-bold"><%= user.name %></td>
+                                <td><%= user.email %></td>
+                                <td><span class="badge-zinc"><%= user.role %></span></td>
+                                <td><%= user.district %></td>
+                                <td class="pe-4 text-end">
+                                    <form action="/collector/approvals/<%= user._id %>/decision" method="POST" class="d-inline">
+                                        <input type="hidden" name="action" value="APPROVE">
+                                        <button type="submit" class="btn-zinc btn-sm">Approve</button>
+                                    </form>
+                                    <form action="/collector/approvals/<%= user._id %>/decision" method="POST" class="d-inline ms-2">
+                                        <input type="hidden" name="action" value="REJECT">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-zinc-500">No pending approvals.</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
         </div>
     </div>
 

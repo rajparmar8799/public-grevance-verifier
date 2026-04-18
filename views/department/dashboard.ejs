@@ -3,6 +3,13 @@
 <div class="hero-bg-mask" style="opacity: 0.1;"></div>
 
 <div class="relative z-10">
+    <% if (error) { %>
+        <div class="alert alert-danger"><%= error %></div>
+    <% } %>
+    <% if (message) { %>
+        <div class="alert alert-success"><%= message %></div>
+    <% } %>
+
     <div class="glass-card mb-4 d-flex justify-content-between align-items-center animate-fade-in">
         <div>
             <h2 class="mb-1 fw-bold tracking-tighter">Department Portal</h2>
@@ -14,6 +21,52 @@
                 <span class="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
             </span>
             Connected: District HQ
+        </div>
+    </div>
+
+    <div class="glass-card p-0 overflow-hidden mb-4 animate-fade-in delay-100">
+        <div class="p-4 border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold tracking-tighter">Pending Field Officer Approvals</h5>
+            <span class="badge-zinc"><%= pendingFieldOfficers.length %> pending</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Name</th>
+                        <th>Email</th>
+                        <th>District</th>
+                        <th>Department</th>
+                        <th class="pe-4 text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (pendingFieldOfficers.length > 0) { %>
+                        <% pendingFieldOfficers.forEach(user => { %>
+                            <tr>
+                                <td class="ps-4 fw-bold"><%= user.name %></td>
+                                <td><%= user.email %></td>
+                                <td><%= user.district %></td>
+                                <td><%= user.department %></td>
+                                <td class="pe-4 text-end">
+                                    <form action="/department/approvals/<%= user._id %>/decision" method="POST" class="d-inline">
+                                        <input type="hidden" name="action" value="APPROVE">
+                                        <button type="submit" class="btn-zinc btn-sm">Approve</button>
+                                    </form>
+                                    <form action="/department/approvals/<%= user._id %>/decision" method="POST" class="d-inline ms-2">
+                                        <input type="hidden" name="action" value="REJECT">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-zinc-500">No pending field officer approvals.</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
         </div>
     </div>
 

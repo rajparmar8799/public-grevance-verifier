@@ -3,7 +3,7 @@ TITLE Swagat AI Verifier - Integrated Setup
 SETLOCAL EnableDelayedExpansion
 
 echo ======================================================
-echo    SWAGAT AI VERIFIER - AUTOMATED SETUP & RUNNER
+echo    SWAGAT AI VERIFIER - AUTOMATED SETUP ^& RUNNER
 echo ======================================================
 echo.
 
@@ -26,7 +26,7 @@ echo [OK] Node and Python found.
 
 :: 2. INSTALL LIBRARIES
 echo.
-echo [Step 2/5] Synchronizing dependencies (npm & pip)...
+echo [Step 2/5] Synchronizing dependencies (npm ^& pip)...
 call npm install
 call pip install -r ml/requirements.txt
 echo [OK] Dependencies ready.
@@ -70,3 +70,4 @@ echo.
 echo Keep the other terminal windows open to maintain the system.
 echo Press any key to close this installer...
 pause >nul
+

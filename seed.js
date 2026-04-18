@@ -2,6 +2,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const Complaint = require('./models/Complaint');
 const DepartmentScore = require('./models/DepartmentScore');
+const User = require('./models/User');
 
 const seedComplaints = [
     {
@@ -20,7 +21,6 @@ const seedComplaints = [
         district: 'Gandhinagar',
         department: 'Urban Development',
         status: 'RESOLVED_PENDING_VERIFICATION',
-        assigned_officer: 'Officer_GNR_01',
         evidence: { photo_uploaded: 0, gps_match_flag: 0 }
     },
     {
@@ -57,6 +57,7 @@ const seedData = async () => {
         // WIPE DATA
         await Complaint.deleteMany({});
         await DepartmentScore.deleteMany({});
+        await User.deleteMany({});
         console.log('Cleared existing database records.');
 
         // SEED COMPLAINTS
@@ -71,6 +72,69 @@ const seedData = async () => {
         ];
         await DepartmentScore.insertMany(depts);
         console.log('Initialized department performance scores.');
+
+        // Seed demo users for all auth roles
+        const demoUsers = [
+            {
+                name: 'Demo Citizen',
+                email: 'citizen.demo@swagat.local',
+                password: 'Citizen@123',
+                role: 'citizen',
+                status: 'APPROVED',
+                district: 'Ahmedabad',
+                department: 'Water Supply'
+            },
+            {
+                name: 'Demo Field Officer',
+                email: 'field.demo@swagat.local',
+                password: 'Field@123',
+                role: 'field_officer',
+                status: 'APPROVED',
+                district: 'Ahmedabad',
+                department: 'Urban Development'
+            },
+            {
+                name: 'Demo Department Officer',
+                email: 'department.demo@swagat.local',
+                password: 'Department@123',
+                role: 'department_officer',
+                status: 'APPROVED',
+                district: 'Ahmedabad',
+                department: 'Urban Development'
+            },
+            {
+                name: 'Demo Collector',
+                email: 'collector.demo@swagat.local',
+                password: 'Collector@123',
+                role: 'collector',
+                status: 'APPROVED',
+                district: 'Ahmedabad',
+                department: 'District Administration'
+            },
+            {
+                name: 'Pending Field Officer',
+                email: 'field.pending@swagat.local',
+                password: 'FieldPending@123',
+                role: 'field_officer',
+                status: 'PENDING',
+                district: 'Ahmedabad',
+                department: 'Urban Development'
+            },
+            {
+                name: 'Pending Department Officer',
+                email: 'department.pending@swagat.local',
+                password: 'DeptPending@123',
+                role: 'department_officer',
+                status: 'PENDING',
+                district: 'Ahmedabad',
+                department: 'Urban Development'
+            }
+        ];
+
+        for (const demoUser of demoUsers) {
+            await User.create(demoUser);
+        }
+        console.log('Seeded demo users for role-based auth.');
 
         await mongoose.disconnect();
         console.log('Seeding complete. Connection closed.');
