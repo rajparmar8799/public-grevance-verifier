@@ -1,5 +1,8 @@
 # Jan Vishwas: Automated Fraud Detection & Resolution Verification Layer
 
+Team name : InnovateX 
+Team ID : 507
+
 ## Overview
 Jan Vishwas is a comprehensive, AI-powered anti-fraud and verification layer designed specifically to augment existing grievance redressal systems (like the Gujarat Swagat Portal). It ensures that field-level public service resolutions are authentic, verifiable, and citizen-approved.
 
