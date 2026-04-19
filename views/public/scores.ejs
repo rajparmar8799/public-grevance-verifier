@@ -1,0 +1,147 @@
+<%- include('../layout/header') %>
+
+<div class="hero-bg-mask" style="opacity: 0.1;"></div>
+
+<div class="relative z-10">
+    <div class="glass-card mb-5 d-flex justify-content-between align-items-center animate-fade-in">
+        <div>
+            <h1 class="mb-1 fw-bold tracking-tighter">Department Quality Index</h1>
+            <p class="text-zinc-500 mb-0 small uppercase tracking-widest">
+                Gujarat Swagat Portal — Public Transparency Dashboard
+            </p>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <div class="badge-zinc">
+                <i data-lucide="globe" class="text-success" style="width: 14px;"></i>
+                Public Access
+            </div>
+        </div>
+    </div>
+
+    <!-- Overall Stats -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="glass-card stats-card text-center py-4 animate-fade-in delay-100">
+                <i data-lucide="inbox" class="text-zinc-500 mb-2" style="width:20px; height:20px;"></i>
+                <div class="text-zinc-500 small mb-2 uppercase tracking-widest" style="font-size:9px;">TOTAL COMPLAINTS</div>
+                <h2 class="mb-0 fw-bold tracking-tighter"><%= stats.totalComplaints %></h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card stats-card text-center py-4 animate-fade-in delay-200" style="border-bottom: 3px solid #22c55e;">
+                <i data-lucide="check-circle-2" class="text-success mb-2" style="width:20px; height:20px;"></i>
+                <div class="text-zinc-500 small mb-2 uppercase tracking-widest" style="font-size:9px;">VERIFIED</div>
+                <h2 class="mb-0 fw-bold tracking-tighter text-success"><%= stats.totalVerified %></h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card stats-card text-center py-4 animate-fade-in delay-300" style="border-bottom: 3px solid #ef4444;">
+                <i data-lucide="alert-triangle" class="text-danger mb-2" style="width:20px; height:20px;"></i>
+                <div class="text-zinc-500 small mb-2 uppercase tracking-widest" style="font-size:9px;">FAILED / REOPENED</div>
+                <h2 class="mb-0 fw-bold tracking-tighter text-danger"><%= stats.totalFailed %></h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card stats-card text-center py-4 animate-fade-in delay-400">
+                <i data-lucide="bar-chart-3" class="text-saffron mb-2" style="width:20px; height:20px;"></i>
+                <div class="text-zinc-500 small mb-2 uppercase tracking-widest" style="font-size:9px;">OVERALL VERIFICATION RATE</div>
+                <h2 class="mb-0 fw-bold tracking-tighter"><%= stats.overallRate %>%</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Department Leaderboard -->
+    <h5 class="mb-4 d-flex align-items-center gap-2 animate-fade-in delay-500">
+        <i data-lucide="trophy" class="text-saffron" style="width: 20px;"></i>
+        <span class="fw-bold tracking-tighter">Department Performance Leaderboard</span>
+    </h5>
+
+    <div class="glass-card p-0 overflow-hidden mb-5 animate-fade-in delay-500">
+        <div class="table-responsive">
+            <table class="table mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th class="ps-4" style="width:50px;">#</th>
+                        <th>DEPARTMENT / DISTRICT</th>
+                        <th class="text-center">VOLUME</th>
+                        <th class="text-center">VERIFIED</th>
+                        <th class="text-center">FAILED</th>
+                        <th class="text-center">AVG RESOLUTION</th>
+                        <th class="pe-4" style="min-width:200px;">QUALITY SCORE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if(scores.length > 0) { %>
+                        <% scores.forEach((s, i) => { %>
+                            <% const band = s.quality_score >= 75 ? 'success' : s.quality_score >= 40 ? 'warning' : 'danger'; %>
+                            <tr style="<%= i < 3 ? 'background: rgba(255,255,255,0.02;)' : '' %>">
+                                <td class="ps-4">
+                                    <% if (i === 0) { %>
+                                        <span class="text-saffron fw-bold">🥇</span>
+                                    <% } else if (i === 1) { %>
+                                        <span class="text-zinc-400 fw-bold">🥈</span>
+                                    <% } else if (i === 2) { %>
+                                        <span class="text-zinc-500 fw-bold">🥉</span>
+                                    <% } else { %>
+                                        <span class="text-zinc-600 small"><%= i + 1 %></span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <div class="fw-bold"><%= s.department %></div>
+                                    <div class="small text-zinc-500"><%= s.district %></div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="fw-bold"><%= s.total_resolved %></span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="text-success fw-bold"><%= s.verified_count %></span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="text-danger fw-bold"><%= s.failed_count + s.reopened_count %></span>
+                                </td>
+                                <td class="text-center">
+                                    <% if (s.avg_resolution_hours !== null) { %>
+                                        <span class="small fw-bold">
+                                            <%= s.avg_resolution_hours < 24
+                                                ? s.avg_resolution_hours + 'h'
+                                                : Math.round(s.avg_resolution_hours / 24) + 'd' %>
+                                        </span>
+                                    <% } else { %>
+                                        <span class="text-zinc-600 small">—</span>
+                                    <% } %>
+                                </td>
+                                <td class="pe-4">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="progress-zinc flex-grow-1" style="height:8px;">
+                                            <div class="progress-bar-zinc bg-<%= band %>"
+                                                 style="width: <%= s.quality_score %>%; transition: width 1s ease;">
+                                            </div>
+                                        </div>
+                                        <span class="small fw-bold font-monospace text-<%= band %>" style="min-width:40px;">
+                                            <%= s.quality_score %>%
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-zinc-500">
+                                No department data available yet. Scores populate after grievances are verified.
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="text-center mb-5 animate-fade-in delay-500">
+        <p class="text-zinc-600 small">
+            <i data-lucide="clock" style="width:12px;" class="me-1"></i>
+            Scores updated in real-time after each verification cycle. Data is auto-generated — no manual override possible.
+        </p>
+    </div>
+</div>
+
+<%- include('../layout/footer') %>

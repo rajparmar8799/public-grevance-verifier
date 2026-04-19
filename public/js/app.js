@@ -1,11 +1,4 @@
 /**
- * Swagat Grievance Verifier - Client-side Utilities
- * Form validation, UI enhancements, and common utilities
- */
-
-// ==================== FORM VALIDATION ====================
-
-/**
  * Validate email format
  * @param {string} email - Email to validate
  * @returns {boolean} - True if valid email
@@ -22,7 +15,7 @@ function isValidEmail(email) {
  */
 function isValidPhone(phone) {
   const phoneRegex = /^[0-9]{10}$/;
-  return phoneRegex.test(phone.replace(/\D/g, ''));
+  return phoneRegex.test(phone.replace(/\D/g, ""));
 }
 
 /**
@@ -34,24 +27,25 @@ function validatePassword(password) {
   const errors = [];
 
   if (password.length < 8) {
-    errors.push('At least 8 characters');
+    errors.push("At least 8 characters");
   }
   if (!/[A-Z]/.test(password)) {
-    errors.push('At least one uppercase letter');
+    errors.push("At least one uppercase letter");
   }
   if (!/[a-z]/.test(password)) {
-    errors.push('At least one lowercase letter');
+    errors.push("At least one lowercase letter");
   }
   if (!/[0-9]/.test(password)) {
-    errors.push('At least one number');
+    errors.push("At least one number");
   }
   if (!/[!@#$%^&*]/.test(password)) {
-    errors.push('At least one special character (!@#$%^&*)');
+    errors.push("At least one special character (!@#$%^&*)");
   }
 
   return {
     isValid: errors.length === 0,
-    message: errors.length > 0 ? 'Password must contain: ' + errors.join(', ') : ''
+    message:
+      errors.length > 0 ? "Password must contain: " + errors.join(", ") : "",
   };
 }
 
@@ -62,31 +56,29 @@ function validatePassword(password) {
  * @returns {object} - { isValid: boolean, message: string }
  */
 function validateFileUpload(file, maxSizeMB = 5) {
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
   const maxSizeBytes = maxSizeMB * 1024 * 1024;
 
   if (!file) {
-    return { isValid: false, message: 'No file selected' };
+    return { isValid: false, message: "No file selected" };
   }
 
   if (!allowedTypes.includes(file.type)) {
     return {
       isValid: false,
-      message: 'Only JPEG, PNG, and WebP images are allowed'
+      message: "Only JPEG, PNG, and WebP images are allowed",
     };
   }
 
   if (file.size > maxSizeBytes) {
     return {
       isValid: false,
-      message: `File size must be less than ${maxSizeMB}MB (current: ${(file.size / 1024 / 1024).toFixed(2)}MB)`
+      message: `File size must be less than ${maxSizeMB}MB (current: ${(file.size / 1024 / 1024).toFixed(2)}MB)`,
     };
   }
 
-  return { isValid: true, message: '' };
+  return { isValid: true, message: "" };
 }
-
-// ==================== FORM HANDLERS ====================
 
 /**
  * Setup form validation listeners
@@ -115,40 +107,41 @@ function setupSignupValidation(form) {
   const submitBtn = form.querySelector('button[type="submit"]');
 
   if (emailInput) {
-    emailInput.addEventListener('blur', () => {
+    emailInput.addEventListener("blur", () => {
       const email = emailInput.value.trim();
       if (email && !isValidEmail(email)) {
-        emailInput.classList.add('is-invalid');
-        showValidationError(emailInput, 'Invalid email format');
+        emailInput.classList.add("is-invalid");
+        showValidationError(emailInput, "Invalid email format");
       } else {
-        emailInput.classList.remove('is-invalid');
+        emailInput.classList.remove("is-invalid");
         removeValidationError(emailInput);
       }
     });
   }
 
   if (passwordInput) {
-    passwordInput.addEventListener('blur', () => {
+    passwordInput.addEventListener("blur", () => {
       const result = validatePassword(passwordInput.value);
       if (!result.isValid && passwordInput.value.length > 0) {
-        passwordInput.classList.add('is-invalid');
+        passwordInput.classList.add("is-invalid");
         showValidationError(passwordInput, result.message);
       } else {
-        passwordInput.classList.remove('is-invalid');
+        passwordInput.classList.remove("is-invalid");
         removeValidationError(passwordInput);
       }
     });
   }
 
   if (submitBtn) {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener("submit", (e) => {
       if (!validateFormBeforeSubmit(form)) {
         e.preventDefault();
         return;
       }
 
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating account...';
+      submitBtn.innerHTML =
+        '<span class="spinner-border spinner-border-sm me-2"></span>Creating account...';
     });
   }
 }
@@ -163,22 +156,23 @@ function setupLoginValidation(form) {
   const submitBtn = form.querySelector('button[type="submit"]');
 
   if (submitBtn) {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener("submit", (e) => {
       if (!emailInput.value.trim() || !passwordInput.value) {
         e.preventDefault();
-        showAlert('Please fill in all fields', 'warning');
+        showAlert("Please fill in all fields", "warning");
         return;
       }
 
       if (!isValidEmail(emailInput.value)) {
         e.preventDefault();
-        showAlert('Invalid email format', 'danger');
+        showAlert("Invalid email format", "danger");
         emailInput.focus();
         return;
       }
 
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Signing in...';
+      submitBtn.innerHTML =
+        '<span class="spinner-border spinner-border-sm me-2"></span>Signing in...';
     });
   }
 }
@@ -189,15 +183,15 @@ function setupLoginValidation(form) {
  * @returns {boolean} - True if form is valid
  */
 function validateFormBeforeSubmit(form) {
-  const inputs = form.querySelectorAll('[required]');
+  const inputs = form.querySelectorAll("[required]");
   let isValid = true;
 
-  inputs.forEach(input => {
+  inputs.forEach((input) => {
     if (!input.value.trim()) {
-      input.classList.add('is-invalid');
+      input.classList.add("is-invalid");
       isValid = false;
     } else {
-      input.classList.remove('is-invalid');
+      input.classList.remove("is-invalid");
     }
   });
 
@@ -210,10 +204,10 @@ function validateFormBeforeSubmit(form) {
  * @param {string} message - Error message
  */
 function showValidationError(element, message) {
-  let errorDiv = element.parentElement.querySelector('.invalid-feedback');
+  let errorDiv = element.parentElement.querySelector(".invalid-feedback");
   if (!errorDiv) {
-    errorDiv = document.createElement('div');
-    errorDiv.className = 'invalid-feedback d-block mt-1';
+    errorDiv = document.createElement("div");
+    errorDiv.className = "invalid-feedback d-block mt-1";
     element.parentElement.appendChild(errorDiv);
   }
   errorDiv.textContent = message;
@@ -224,13 +218,11 @@ function showValidationError(element, message) {
  * @param {HTMLElement} element - Input element
  */
 function removeValidationError(element) {
-  const errorDiv = element.parentElement.querySelector('.invalid-feedback');
+  const errorDiv = element.parentElement.querySelector(".invalid-feedback");
   if (errorDiv) {
     errorDiv.remove();
   }
 }
-
-// ==================== ALERTS & NOTIFICATIONS ====================
 
 /**
  * Show alert message
@@ -238,16 +230,17 @@ function removeValidationError(element) {
  * @param {string} type - Alert type: 'success', 'danger', 'warning', 'info'
  * @param {number} duration - Duration to show (ms, 0 = permanent)
  */
-function showAlert(message, type = 'info', duration = 5000) {
-  const alertDiv = document.createElement('div');
+function showAlert(message, type = "info", duration = 5000) {
+  const alertDiv = document.createElement("div");
   alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-  alertDiv.role = 'alert';
+  alertDiv.role = "alert";
   alertDiv.innerHTML = `
     ${message}
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   `;
 
-  const container = document.querySelector('.container-custom') || document.body;
+  const container =
+    document.querySelector(".container-custom") || document.body;
   container.insertBefore(alertDiv, container.firstChild);
 
   if (duration > 0) {
@@ -257,14 +250,12 @@ function showAlert(message, type = 'info', duration = 5000) {
   }
 }
 
-// ==================== UI ENHANCEMENTS ====================
-
 /**
  * Add loading state to buttons
  * @param {HTMLElement} button - Button element
  * @param {string} message - Loading message
  */
-function setButtonLoading(button, message = 'Loading...') {
+function setButtonLoading(button, message = "Loading...") {
   button.disabled = true;
   button.dataset.originalText = button.innerHTML;
   button.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>${message}`;
@@ -276,7 +267,7 @@ function setButtonLoading(button, message = 'Loading...') {
  */
 function resetButton(button) {
   button.disabled = false;
-  button.innerHTML = button.dataset.originalText || 'Submit';
+  button.innerHTML = button.dataset.originalText || "Submit";
 }
 
 /**
@@ -285,10 +276,10 @@ function resetButton(button) {
  * @returns {string} - Formatted currency string
  */
 function formatCurrency(value) {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 0
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    minimumFractionDigits: 0,
   }).format(value);
 }
 
@@ -298,12 +289,12 @@ function formatCurrency(value) {
  * @returns {string} - Formatted date string
  */
 function formatDate(date) {
-  return new Intl.DateTimeFormat('en-IN', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+  return new Intl.DateTimeFormat("en-IN", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   }).format(new Date(date));
 }
 
@@ -315,8 +306,6 @@ function formatDate(date) {
 function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
-
-// ==================== UTILITIES ====================
 
 /**
  * Get query parameter from URL
@@ -333,7 +322,9 @@ function getQueryParam(param) {
  * @returns {boolean} - True if mobile device
  */
 function isMobileDevice() {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent,
+  );
 }
 
 /**
@@ -354,23 +345,23 @@ function debounce(func, wait = 500) {
   };
 }
 
-// ==================== INITIALIZATION ====================
-
 /**
  * Initialize all form handlers and UI enhancements
  */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   // Setup form validation
   setupFormValidation();
 
   // Initialize Bootstrap tooltips if available
-  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-  tooltipTriggerList.forEach(tooltipTriggerEl => {
+  const tooltipTriggerList = [].slice.call(
+    document.querySelectorAll('[data-bs-toggle="tooltip"]'),
+  );
+  tooltipTriggerList.forEach((tooltipTriggerEl) => {
     new bootstrap.Tooltip(tooltipTriggerEl);
   });
 
   // Initialize Lucide icons
-  if (typeof lucide !== 'undefined') {
+  if (typeof lucide !== "undefined") {
     lucide.createIcons();
   }
 });
@@ -389,5 +380,5 @@ window.appUtils = {
   capitalize,
   getQueryParam,
   isMobileDevice,
-  debounce
+  debounce,
 };

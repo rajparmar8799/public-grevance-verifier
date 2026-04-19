@@ -1,40 +1,66 @@
-# Swagat Grievance Resolution Verifier 🏛️🤖
+# Jan Vishwas: Automated Fraud Detection & Resolution Verification Layer
 
-An intelligent, AI-assisted verification layer integrated into the **Swagat Portal** to ensure every public grievance resolution is authentic, physically verified, and citizen-approved.
+## Overview
+Jan Vishwas is a comprehensive, AI-powered anti-fraud and verification layer designed specifically to augment existing grievance redressal systems (like the Gujarat Swagat Portal). It ensures that field-level public service resolutions are authentic, verifiable, and citizen-approved.
 
-## 🚀 The Problem
-Many transparency platforms suffer from "Paper Resolutions"—where grievances are marked as resolved in the system without actual ground action. This project solves that by adding a mandatory **Physical & Digital Audit Loop**.
+## Problem Statement
+In large-scale public grievance systems, it is difficult for central state authorities to verify if a grievance marked as "Resolved" by a field officer has actually been addressed on the ground. This gap in the procedural loop allows for "paper resolutions"—where complaints are closed without physical intervention, leading to skewed operational statistics and continued citizen distress. 
 
-## ✨ Key Features
-- **🤖 ML Fraud Detection**: A Python AI engine (RandomForest) that analyzes GPS logs, photo metadata, and citizen responses to calculate a **Resolution Risk Score**.
-- **📍 GIS-Tagged Evidence**: Field Officers must submit site photos with real-time GPS coordinates. The system automatically flags mismatches over 500m from the complaint site.
-- **📞 Automated IVR Confirmation**: Simulates an automated call to the citizen to confirm satisfaction. Disputes by citizens trigger an automatic **Auto-Reopen**.
-- **📊 Collector Dashboard**: Real-time "Department Quality Scores" and audit trails for the District Collector to monitor administrative performance.
-- **💎 Premium Zinc Theme**: A high-end, glassmorphism-based UI designed for mission-critical government operations.
+There is an urgent need for an automated, tamper-proof system to audit these field resolutions at scale without exponentially increasing manual administrative overhead.
 
-## 🛠️ Technology Stack
-- **Backend**: Node.js, Express, EJS, MongoDB (Mongoose)
-- **AI/ML**: Python 3.11, Flask, Scikit-Learn, Pandas
-- **Icons**: Lucide Icons
-- **Design**: Vanilla CSS with Glassmorphism & Zinc design system
+## The Solution
+Jan Vishwas solves this procedural vulnerability by establishing a zero-trust verification pipeline. Before a grievance can be permanently closed, the system algorithmically audits the officer's submission using spatial, temporal, and direct-citizen data points. High-risk closures are automatically flagged and reopened for senior review.
 
-## ⚡ One-Click Startup (For Team Members)
-We've made it easy for the team to run the project. Simply:
-1. Ensure **Node.js**, **Python**, and **MongoDB** are installed and running.
-2. Double-click the `run_swagat.bat` file in the root directory.
+## Key Features & Implementations
 
-**What the script does:**
-- Synchronizes all `npm` and `pip` dependencies.
-- Wipes the database and initializes it with fresh **Seed Data** for testing.
-- Launches the **Node Server (Port 3000)** and **Python API (Port 5001)**.
-- Opens the portal in your default browser.
+### Spatial Validation (GIS)
+Field officers are required to submit their geolocation when marking a case as resolved. The system cross-references the submission coordinates with the original grievance coordinates to calculate the spatial deviance, ensuring the officer was physically present at the site.
 
-## 👥 Personas
-Use the **"Demo Access"** tab on the home page to switch between:
-1. **Citizen**: File complaints and track verification.
-2. **Department**: Mark issues as resolved to trigger verification.
-3. **Field Officer**: Submit on-site photo and GIS evidence.
-4. **Collector**: Audit the entire resolution chain and view department rankings.
+### Live Citizen Confirmation (IVR)
+Upon resolution submission, the system integrates with telecommunication APIs to initiate an automated Interactive Voice Response (IVR) call directly to the citizen. The citizen can securely press keypad inputs to confirm or dispute the resolution claims, circumventing officer-controlled feedback loops.
 
----
-*Built for the Swagat Portal Hackathon - Ensuring accountability through technology.*
+### Machine Learning Fraud Detection Engine
+An independent Python-based Machine Learning Risk Engine continuously calculates a 'Fraud Risk Score' for every resolution. The model generates this score by analyzing:
+*   GPS coordinate mismatch penalties.
+*   The upload and forensic validity of photographic evidence.
+*   The exact timestamp of the resolution submission.
+*   Historical statistical fraud rates associated with the specific operational department.
+*   Live IVR confirmation feedback matrices.
+
+If the Risk Score breaches a dynamically governed threshold, the AI automatically overrides the officer and reopens the grievance.
+
+### District Quality Score (Collector Dashboard)
+A high-level dashboard interface allows District Collectors and administrators to monitor overall verification success rates, inspect AI-generated risk flags, and manually review disputed resolutions with all corresponding forensic data.
+
+## System Architecture & Tech Stack
+
+*   **Frontend**: HTML5, Vanilla JavaScript, CSS3
+*   **Backend Application Server**: Node.js, Express.js
+*   **Database**: MongoDB (Mongoose ORM)
+*   **Telephony & Communications**: Integrated IVR Webhooks 
+*   **Machine Learning API**: Python, Flask, Custom Predictive Models
+*   **Security & Authentication**: JWT, bcrypt, Express Session Management
+
+## Core Modules & User Personas
+
+1.  **Citizen Dashboard**: Allows the public to securely submit grievances along with their active phone number and geographic location.
+2.  **Department Portal**: Enables internal routing where sub-divisional officers can assign grievances to specific field officers.
+3.  **GIS Verification Officer Portal**: The field interface where officers are required to upload site photographs and broadcast their active GPS location to submit a resolution request.
+4.  **District Collector Portal**: The oversight interface where administrators can audit the autonomous decisions made by the ML Risk Engine and review the overall health of district departments.
+
+## Setup & Initialization
+
+### Prerequisites
+*   Node.js (v16+)
+*   Python (3.8+)
+*   MongoDB (running locally on port 27017 or remote cluster)
+
+### Bootstrapping the Environment
+1. Clone the repository to your local environment.
+2. Ensure environment variables are correctly configured for database bridging and communication APIs.
+3. Execute the automated bootstrap script to install dependencies, run database seeds, and launch the dual-server architecture:
+
+```bash
+run_swagat.bat
+```
+*(The script will automatically install NPM and PIP packages, launch the core application server, and initialize the ML Analytics Engine on its designated port).* 

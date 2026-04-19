@@ -8,6 +8,7 @@ const departmentScoreSchema = new mongoose.Schema({
   failed_count: { type: Number, default: 0 },
   reopened_count: { type: Number, default: 0 },
   quality_score: { type: Number, default: 0 },
+  avg_resolution_hours: { type: Number, default: null },
   last_updated: { type: Date, default: Date.now }
 }, { timestamps: true });
 

@@ -1,122 +1,243 @@
-const express   = require('express');
-const router    = express.Router();
-const Complaint = require('../models/Complaint');
-const { upload }           = require('../utils/multerConfig');
-const { haversineDistance } = require('../utils/geo');
-const mlService             = require('../services/mlService');
-const { requireRoleAndApproved } = require('../middleware/authMiddleware');
+const express = require("express");
+const router = express.Router();
+const path = require("path");
+const Complaint = require("../models/Complaint");
+const { upload } = require("../utils/multerConfig");
+const { haversineDistance } = require("../utils/geo");
+const { crossVerifyGps, addGpsWatermark } = require("../utils/photoVerify");
+const mlService = require("../services/mlService");
+const { requireRoleAndApproved } = require("../middleware/authMiddleware");
 
-router.use(requireRoleAndApproved(['field_officer']));
+router.use(requireRoleAndApproved(["field_officer"]));
 
-// ─── Field Officer Dashboard ─────────────────────────────────────────────────
-router.get('/officer/dashboard', async (req, res) => {
-    try {
-        // Show complaints needing evidence upload — assigned to this officer
-        const complaints = await Complaint.find({
-            status:           'RESOLVED_PENDING_VERIFICATION',
-            assigned_officer: req.session.user._id
-        }).sort({ createdAt: -1 });
+router.get("/dashboard", async (req, res) => {
+  try {
+    const complaints = await Complaint.find({
+      status: "RESOLVED_PENDING_VERIFICATION",
+      assigned_officer: req.session.user._id,
+    }).sort({ createdAt: -1 });
 
-        // Also show any unassigned ones in same district (backup)
-        const unassigned = await Complaint.find({
-            status:           'RESOLVED_PENDING_VERIFICATION',
-            assigned_officer: null,
-            district:         req.session.user.district || 'Ahmedabad'
-        }).sort({ createdAt: -1 });
+    const unassigned = await Complaint.find({
+      status: "RESOLVED_PENDING_VERIFICATION",
+      assigned_officer: null,
+      district: req.session.user.district || "Ahmedabad",
+    }).sort({ createdAt: -1 });
 
-        res.render('field-officer/dashboard', {
-            complaints: [...complaints, ...unassigned],
-            error:   req.query.error   || null,
-            message: req.query.message || null
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Server Error');
-    }
+    res.render("field-officer/dashboard", {
+      complaints: [...complaints, ...unassigned],
+      error: req.query.error || null,
+      message: req.query.message || null,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server Error");
+  }
 });
 
-// ─── Submit Evidence ─────────────────────────────────────────────────────────
-// Note: ML verification is NOT triggered here — it fires from the IVR webhook
-// once the citizen has confirmed/disputed. This follows the 3-step flow:
-//   Step 1 (Dept) → Step 2 (IVR citizen call) → Step 3 (Field evidence + ML)
-//
-// However, if the IVR already completed before the officer uploads evidence,
-// we detect that and trigger ML immediately.
-// ─────────────────────────────────────────────────────────────────────────────
-router.post('/officer/evidence/:id/submit', upload.single('photo'), async (req, res) => {
+router.post(
+  "/evidence/:id/submit",
+  upload.single("photo"),
+  async (req, res) => {
     try {
-        const { lat, lng } = req.body;
-        const grievance    = await Complaint.findById(req.params.id);
+      const {
+        lat,
+        lng,
+        accuracy,
+        modal_open_lat,
+        modal_open_lng,
+        modal_open_accuracy,
+      } = req.body;
+      const grievance = await Complaint.findById(req.params.id);
 
-        if (!grievance) return res.status(404).send('Complaint not found');
+      if (!grievance) return res.status(404).send("Complaint not found");
 
-        if (!req.file) {
-            return res.redirect('/officer/dashboard?error=Please upload a valid image (jpg, jpeg, png, webp)');
-        }
-
-        const parsedLat  = Number.parseFloat(lat);
-        const parsedLng  = Number.parseFloat(lng);
-        const hasValidGps = Number.isFinite(parsedLat) && Number.isFinite(parsedLng);
-
-        // GPS distance check against complaint's district centre
-        // In production the Complaint model would store the actual grievance lat/lng
-        const districtCentres = {
-            'Ahmedabad':  { lat: 23.0225, lng: 72.5714 },
-            'Surat':      { lat: 21.1702, lng: 72.8311 },
-            'Gandhinagar':{ lat: 23.2156, lng: 72.6369 },
-            'Vadodara':   { lat: 22.3072, lng: 73.1812 },
-            'Rajkot':     { lat: 22.3039, lng: 70.8022 }
-        };
-        const centre   = districtCentres[grievance.district] || districtCentres['Ahmedabad'];
-        const targetLat = centre.lat;
-        const targetLng = centre.lng;
-
-        let distance  = null;
-        let gps_match = 0;
-
-        if (hasValidGps) {
-            distance  = haversineDistance(parsedLat, parsedLng, targetLat, targetLng);
-            gps_match = distance < 500 ? 1 : 0;
-        }
-
-        // Update evidence fields
-        await Complaint.findByIdAndUpdate(req.params.id, {
-            'evidence.photo_url':             `/uploads/${req.file.filename}`,
-            'evidence.photo_uploaded':        1,
-            'evidence.photo_timestamp':       new Date(),
-            'evidence.evidence_submitted_at': new Date(),
-            'evidence.officer_lat':           hasValidGps ? parsedLat : null,
-            'evidence.officer_lng':           hasValidGps ? parsedLng : null,
-            'evidence.gps_match_flag':        gps_match,
-            'evidence.gps_distance_meters':   Number.isFinite(distance) ? Math.round(distance) : null
-        });
-
-        console.log(`[FIELD] Evidence submitted for grievance ${req.params.id} | GPS match: ${gps_match}`);
-
-        // ── Smart ML trigger ──────────────────────────────────────────────────
-        // If IVR already completed before evidence upload, trigger ML now.
-        // Otherwise, IVR webhook (/api/ivr/response or /api/ivr/status) will trigger it.
-        const ivrDone = ['SUCCESS', 'DISPUTED', 'NO_RESPONSE', 'FAILED'].includes(
-            grievance.evidence.ivr_call_status
+      if (!req.file) {
+        return res.redirect(
+          "/officer/dashboard?error=Please upload a valid image (jpg, jpeg, png, webp)",
         );
+      }
 
-        if (ivrDone) {
-            console.log(`[FIELD] IVR already completed — triggering ML immediately for ${req.params.id}`);
-            // Run async, don't block the redirect
-            mlService.verifyGrievance(req.params.id).catch(console.error);
-        } else {
-            console.log(`[FIELD] IVR pending — ML will trigger from IVR webhook for ${req.params.id}`);
-        }
+      const parsedLat = Number.parseFloat(lat);
+      const parsedLng = Number.parseFloat(lng);
+      const parsedAccuracy = Number.parseFloat(accuracy);
+      const hasValidGps =
+        Number.isFinite(parsedLat) && Number.isFinite(parsedLng);
 
-        if (!hasValidGps) {
-            return res.redirect('/officer/dashboard?message=Evidence submitted. GPS unavailable — verification will proceed with IVR and photo signals.');
-        }
+      let targetLat, targetLng, gpsSource;
 
-        res.redirect('/officer/dashboard?message=Evidence submitted successfully. Awaiting IVR confirmation for final verification.');
+      if (
+        Number.isFinite(grievance.complaint_lat) &&
+        Number.isFinite(grievance.complaint_lng)
+      ) {
+        targetLat = grievance.complaint_lat;
+        targetLng = grievance.complaint_lng;
+        gpsSource = "COMPLAINT_GPS";
+      } else {
+        const districtCentres = {
+          Ahmedabad: { lat: 23.0225, lng: 72.5714 },
+          Surat: { lat: 21.1702, lng: 72.8311 },
+          Gandhinagar: { lat: 23.2156, lng: 72.6369 },
+          Vadodara: { lat: 22.3072, lng: 73.1812 },
+          Rajkot: { lat: 22.3039, lng: 70.8022 },
+          Bhavnagar: { lat: 21.7645, lng: 72.1519 },
+          Jamnagar: { lat: 22.4707, lng: 70.0577 },
+          Junagadh: { lat: 21.5222, lng: 70.4579 },
+        };
+        const centre =
+          districtCentres[grievance.district] || districtCentres["Ahmedabad"];
+        targetLat = centre.lat;
+        targetLng = centre.lng;
+        gpsSource = "DISTRICT_CENTRE";
+      }
+
+      let distance = null;
+      let gps_match = 0;
+
+      if (hasValidGps) {
+        distance = haversineDistance(
+          parsedLat,
+          parsedLng,
+          targetLat,
+          targetLng,
+        );
+        const demoMode =
+          (process.env.DEMO_MODE || "false").toLowerCase() === "true";
+        const threshold = demoMode ? 50000 : 500; // 50km for demo, 500m for production
+        gps_match = distance < threshold ? 1 : 0;
+      }
+
+      const uploadedPath = path.join(
+        __dirname,
+        "..",
+        "public",
+        "uploads",
+        req.file.filename,
+      );
+      const exifResult = await crossVerifyGps(
+        uploadedPath,
+        parsedLat,
+        parsedLng,
+      );
+
+      console.log(
+        `[EXIF] Grievance ${req.params.id}: photo EXIF → ${exifResult.match_status}` +
+          (exifResult.distance_meters != null
+            ? ` (${exifResult.distance_meters}m)`
+            : ""),
+      );
+
+      const watermarkedFilename = `wm_${req.file.filename}`;
+      const watermarkedPath = path.join(
+        __dirname,
+        "..",
+        "public",
+        "uploads",
+        watermarkedFilename,
+      );
+
+      await addGpsWatermark(uploadedPath, watermarkedPath, {
+        lat: hasValidGps ? parsedLat : 0,
+        lng: hasValidGps ? parsedLng : 0,
+        accuracy: parsedAccuracy || null,
+        distance: distance != null ? Math.round(distance) : null,
+        status: gps_match ? "GPS MATCH ✓" : "GPS MISMATCH ✗",
+        timestamp: new Date().toISOString(),
+      });
+
+      const updateObj = {
+        "evidence.photo_url": `/uploads/${req.file.filename}`,
+        "evidence.photo_watermarked_url": `/uploads/${watermarkedFilename}`,
+        "evidence.photo_uploaded": 1,
+        "evidence.photo_timestamp": new Date(),
+        "evidence.evidence_submitted_at": new Date(),
+        "evidence.officer_lat": hasValidGps ? parsedLat : null,
+        "evidence.officer_lng": hasValidGps ? parsedLng : null,
+        "evidence.gps_accuracy": Number.isFinite(parsedAccuracy)
+          ? parsedAccuracy
+          : null,
+        "evidence.gps_match_flag": gps_match,
+        "evidence.gps_distance_meters": Number.isFinite(distance)
+          ? Math.round(distance)
+          : null,
+        // EXIF results
+        "evidence.exif_lat": exifResult.exif_data
+          ? exifResult.exif_data.lat
+          : null,
+        "evidence.exif_lng": exifResult.exif_data
+          ? exifResult.exif_data.lng
+          : null,
+        "evidence.exif_camera": exifResult.exif_data
+          ? exifResult.exif_data.camera
+          : null,
+        "evidence.exif_match_status": exifResult.match_status,
+        "evidence.exif_distance_meters": exifResult.distance_meters,
+      };
+
+      const visits = [];
+
+      const moLat = Number.parseFloat(modal_open_lat);
+      const moLng = Number.parseFloat(modal_open_lng);
+      if (Number.isFinite(moLat) && Number.isFinite(moLng)) {
+        visits.push({
+          timestamp: new Date(Date.now() - 30000), // approx 30s before submission
+          lat: moLat,
+          lng: moLng,
+          accuracy: Number.parseFloat(modal_open_accuracy) || null,
+          officer_id: req.session.user._id,
+          action: "GPS_ACQUIRED",
+        });
+      }
+
+      if (hasValidGps) {
+        visits.push({
+          timestamp: new Date(),
+          lat: parsedLat,
+          lng: parsedLng,
+          accuracy: Number.isFinite(parsedAccuracy) ? parsedAccuracy : null,
+          officer_id: req.session.user._id,
+          action: "EVIDENCE_SUBMITTED",
+        });
+      }
+
+      if (visits.length > 0) {
+        updateObj.$push = { field_visits: { $each: visits } };
+      }
+
+      await Complaint.findByIdAndUpdate(req.params.id, updateObj);
+
+      console.log(
+        `[FIELD] Evidence for ${req.params.id} | GPS: ${gps_match ? "MATCH" : "MISMATCH"} | ` +
+          `dist: ${distance ? Math.round(distance) + "m" : "N/A"} | EXIF: ${exifResult.match_status} | ` +
+          `visits logged: ${visits.length}`,
+      );
+
+      const ivrDone = ["SUCCESS", "DISPUTED", "NO_RESPONSE", "FAILED"].includes(
+        grievance.evidence.ivr_call_status,
+      );
+
+      if (ivrDone) {
+        console.log(`[FIELD] IVR done — triggering ML for ${req.params.id}`);
+        mlService.verifyGrievance(req.params.id).catch(console.error);
+      } else {
+        console.log(`[FIELD] IVR pending — ML deferred for ${req.params.id}`);
+      }
+
+      if (!hasValidGps) {
+        return res.redirect(
+          "/officer/dashboard?message=Evidence submitted. GPS unavailable — verification will proceed with IVR and photo signals.",
+        );
+      }
+
+      res.redirect(
+        "/officer/dashboard?message=Evidence submitted successfully. GPS watermark applied. Awaiting IVR confirmation.",
+      );
     } catch (err) {
-        console.error(err);
-        res.redirect('/officer/dashboard?error=Evidence submission failed. Try again.');
+      console.error(err);
+      res.redirect(
+        "/officer/dashboard?error=Evidence submission failed. Try again.",
+      );
     }
-});
+  },
+);
 
 module.exports = router;

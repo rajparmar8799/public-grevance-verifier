@@ -1,86 +1,190 @@
 <%- include('../layout/header') %>
 
-<div class="hero-bg-mask" style="opacity: 0.1;"></div>
+<div class="hero-bg-mask" style="opacity: 0.1"></div>
 
 <div class="row justify-content-center relative z-10">
-    <div class="col-md-7">
-        <div class="glass-card animate-fade-in">
-            <div class="d-flex align-items-center mb-5">
-                <a href="/citizen" class="btn-zinc-outline p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                    <i data-lucide="chevron-left"></i>
-                </a>
-                <div>
-                    <h3 class="mb-0 fw-bold tracking-tighter">Submit Grievance</h3>
-                    <p class="text-zinc-500 mb-0 small uppercase tracking-widest">New Entry</p>
-                </div>
-            </div>
-            
-            <form action="/citizen/new" method="POST" class="space-y-6">
-                <div class="mb-4">
-                    <label class="form-label small fw-bold text-zinc-400 ls-1 mb-2">SUBJECT MATTER</label>
-                    <input type="text" class="form-control" name="subject" placeholder="Summarize the core issue" required>
-                </div>
-                
-                <div class="mb-4">
-                    <label class="form-label small fw-bold text-zinc-400 ls-1 mb-2">DIRECT CONTACT (FOR CALL VERIFICATION)</label>
-                    <div class="input-group" style="border-radius: 12px;">
-                        <span class="input-group-text bg-zinc-900 text-zinc-500 border-0" style="border-radius: 12px 0 0 12px;">+91</span>
-                        <input type="text" class="form-control border-start-0" name="phoneNumber" placeholder="9876543210" style="border-radius: 0 12px 12px 0;" inputmode="numeric" required>
-                    </div>
-                </div>
-
-                <div class="row g-3 mb-4">
-                    <div class="col-sm-6">
-                        <label class="form-label small fw-bold text-zinc-400 ls-1 mb-2">DISTRICT</label>
-                        <select class="form-control" name="district" required>
-                            <option value="">Select District</option>
-                            <option value="Ahmedabad">Ahmedabad</option>
-                            <option value="Surat">Surat</option>
-                            <option value="Gandhinagar">Gandhinagar</option>
-                            <option value="Vadodara">Vadodara</option>
-                            <option value="Rajkot">Rajkot</option>
-                            <option value="Bhavnagar">Bhavnagar</option>
-                            <option value="Jamnagar">Jamnagar</option>
-                            <option value="Junagadh">Junagadh</option>
-                        </select>
-                    </div>
-                    <div class="col-sm-6">
-                        <label class="form-label small fw-bold text-zinc-400 ls-1 mb-2">DEPARTMENT</label>
-                        <select class="form-control" name="department" required>
-                            <option value="">Select Department</option>
-                            <option value="Water Supply">Water Supply</option>
-                            <option value="Roads &amp; Buildings">Roads &amp; Buildings</option>
-                            <option value="Urban Development">Urban Development</option>
-                            <option value="Infrastructure">Infrastructure</option>
-                            <option value="Electricity">Electricity</option>
-                            <option value="Health">Health</option>
-                            <option value="Revenue">Revenue</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="mb-5">
-                    <label class="form-label small fw-bold text-zinc-400 ls-1 mb-2">DETAILED DESCRIPTION</label>
-                    <textarea class="form-control" name="description" rows="5" placeholder="Provide context, location details, and expected resolution..." required></textarea>
-                </div>
-
-                <div class="stats-card p-4 mb-5 border border-white border-opacity-5">
-                    <div class="d-flex align-items-start gap-3">
-                        <i data-lucide="shield-alert" class="text-saffron flex-shrink-0" style="width: 24px; height: 24px; margin-top: 2px;"></i>
-                        <div class="small text-zinc-400 leading-relaxed">
-                            <span class="text-white fw-bold d-block mb-1">Verification Policy:</span>
-                            An automated IVR call will be triggered upon resolution. Ensure the provided number is active for confirmation.
-                        </div>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-zinc w-100 py-3 d-flex align-items-center justify-content-center gap-2 fw-bold">
-                    Submit to Swagat Workspace
-                    <i data-lucide="send" style="width: 16px;"></i>
-                </button>
-            </form>
+  <div class="col-md-7">
+    <div class="glass-card animate-fade-in">
+      <div class="d-flex align-items-center mb-5">
+        <a
+          href="/citizen"
+          class="btn-zinc-outline p-2 me-3 d-flex align-items-center justify-content-center"
+          style="width: 40px; height: 40px"
+        >
+          <i data-lucide="chevron-left"></i>
+        </a>
+        <div>
+          <h3 class="mb-0 fw-bold tracking-tighter">Submit Grievance</h3>
+          <p class="text-zinc-500 mb-0 small uppercase tracking-widest">
+            New Entry
+          </p>
         </div>
+      </div>
+
+      <form action="/citizen/new" method="POST" class="space-y-6">
+        <div class="mb-4">
+          <label class="form-label small fw-bold text-zinc-400 ls-1 mb-2"
+            >SUBJECT MATTER</label
+          >
+          <input
+            type="text"
+            class="form-control"
+            name="subject"
+            placeholder="Summarize the core issue"
+            required
+          />
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label small fw-bold text-zinc-400 ls-1 mb-2"
+            >DIRECT CONTACT (FOR CALL VERIFICATION)</label
+          >
+          <div class="input-group" style="border-radius: 12px">
+            <span
+              class="input-group-text bg-zinc-900 text-zinc-500 border-0"
+              style="border-radius: 12px 0 0 12px"
+              >+91</span
+            >
+            <input
+              type="text"
+              class="form-control border-start-0"
+              name="phoneNumber"
+              placeholder="9876543210"
+              style="border-radius: 0 12px 12px 0"
+              inputmode="numeric"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-sm-6">
+            <label class="form-label small fw-bold text-zinc-400 ls-1 mb-2"
+              >DISTRICT</label
+            >
+            <select class="form-select" name="district" required>
+              <option value="">Select District</option>
+              <option value="Ahmedabad">Ahmedabad</option>
+              <option value="Surat">Surat</option>
+              <option value="Gandhinagar">Gandhinagar</option>
+              <option value="Vadodara">Vadodara</option>
+              <option value="Rajkot">Rajkot</option>
+              <option value="Bhavnagar">Bhavnagar</option>
+              <option value="Jamnagar">Jamnagar</option>
+              <option value="Junagadh">Junagadh</option>
+            </select>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label small fw-bold text-zinc-400 ls-1 mb-2"
+              >DEPARTMENT</label
+            >
+            <select class="form-select" name="department" required>
+              <option value="">Select Department</option>
+              <option value="Water Supply">Water Supply</option>
+              <option value="Roads &amp; Buildings">
+                Roads &amp; Buildings
+              </option>
+              <option value="Urban Development">Urban Development</option>
+              <option value="Infrastructure">Infrastructure</option>
+              <option value="Electricity">Electricity</option>
+              <option value="Health">Health</option>
+              <option value="Revenue">Revenue</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-5">
+          <label class="form-label small fw-bold text-zinc-400 ls-1 mb-2"
+            >DETAILED DESCRIPTION</label
+          >
+          <textarea
+            class="form-control"
+            name="description"
+            rows="5"
+            placeholder="Provide context, location details, and expected resolution..."
+            required
+          ></textarea>
+        </div>
+
+        <input type="hidden" name="complaint_lat" id="complaint_lat" />
+        <input type="hidden" name="complaint_lng" id="complaint_lng" />
+
+        <div
+          id="gps-status"
+          class="stats-card p-3 mb-4 border border-white border-opacity-5 d-flex align-items-center gap-3"
+          style="display: none !important"
+        >
+          <div
+            class="spinner-border spinner-border-sm text-saffron"
+            id="gps-spinner"
+          ></div>
+          <i
+            data-lucide="map-pin-check"
+            id="gps-ok-icon"
+            class="text-success"
+            style="width: 16px; display: none"
+          ></i>
+          <span class="small text-zinc-400" id="gps-text"
+            >Acquiring your location for geo-verification...</span
+          >
+        </div>
+
+        <div class="stats-card p-4 mb-5 border border-white border-opacity-5">
+          <div class="d-flex align-items-start gap-3">
+            <i
+              data-lucide="shield-alert"
+              class="text-saffron flex-shrink-0"
+              style="width: 24px; height: 24px; margin-top: 2px"
+            ></i>
+            <div class="small text-zinc-400 leading-relaxed">
+              <span class="text-white fw-bold d-block mb-1"
+                >Verification Policy:</span
+              >
+              An automated IVR call will be triggered upon resolution. Ensure
+              the provided number is active for confirmation. Your location is
+              captured automatically for geo-verification.
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          class="btn-zinc w-100 py-3 d-flex align-items-center justify-content-center gap-2 fw-bold"
+        >
+          Submit to Swagat Workspace
+          <i data-lucide="send" style="width: 16px"></i>
+        </button>
+      </form>
     </div>
+  </div>
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const statusEl = document.getElementById("gps-status");
+    if (navigator.geolocation) {
+      statusEl.style.display = "flex";
+      statusEl.style.setProperty("display", "flex", "important");
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          document.getElementById("complaint_lat").value = pos.coords.latitude;
+          document.getElementById("complaint_lng").value = pos.coords.longitude;
+          document.getElementById("gps-spinner").style.display = "none";
+          document.getElementById("gps-ok-icon").style.display = "inline-block";
+          document.getElementById("gps-text").innerHTML =
+            `<span class="text-success fw-bold">Location captured:</span> ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
+          lucide.createIcons();
+        },
+        () => {
+          document.getElementById("gps-spinner").style.display = "none";
+          document.getElementById("gps-text").innerHTML =
+            '<span class="text-zinc-500">Location unavailable — complaint will use district centre for verification.</span>';
+        },
+        { enableHighAccuracy: true, timeout: 10000 },
+      );
+    }
+  });
+</script>
 
 <%- include('../layout/footer') %>

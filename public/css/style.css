@@ -14,11 +14,15 @@
     --accent-gold: #ffcd75;
     --accent-saffron: #ff9933;
     --text-white: #e4e4e7;
+    --text-black: #000000;
     --text-pure-white: #ffffff;
 }
 
 body {
-    background-color: var(--zinc-950);
+    background: radial-gradient(circle at 15% 50%, rgba(255, 153, 51, 0.15), transparent 45%),
+                radial-gradient(circle at 85% 30%, rgba(255, 205, 117, 0.10), transparent 45%),
+                linear-gradient(135deg, var(--zinc-700) 0%, var(--zinc-900) 100%);
+    background-attachment: fixed;
     font-family: 'Inter', sans-serif;
     color: var(--text-white);
     min-height: 100vh;
@@ -26,16 +30,10 @@ body {
     overflow-x: hidden;
 }
 
-/* Background Image with Gradient Mask */
+/* Premium Lighter Gradient Background is now on the body directly. 
+   Hiding the mask to prevent inconsistency across different pages. */
 .hero-bg-mask {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    background: url('https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/a72ca2f3-9dd1-4fe4-84ba-fe86468a5237_3840w.webp?w=800&q=80') no-repeat center center;
-    background-size: cover;
-    opacity: 0.3;
-    mask-image: linear-gradient(180deg, transparent, black 10%, black 85%, transparent);
-    -webkit-mask-image: linear-gradient(180deg, transparent, black 10%, black 85%, transparent);
+    display: none !important;
 }
 
 /* Animations */
@@ -171,6 +169,12 @@ h1 {
     color: var(--text-pure-white);
 }
 
+.form-control:disabled, .form-select:disabled {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px dashed var(--glass-border);
+    color: var(--zinc-500);
+}
+
 .form-select option {
     background: #18181b; /* zinc-900 */
     color: var(--text-white);
@@ -210,7 +214,6 @@ h1 {
     border-bottom: 1px solid rgba(255, 255, 255, 0.03);
     padding: 1.25rem 1rem;
     vertical-align: middle;
-    color: var(--text-white);
 }
 
 /* Badge */
@@ -347,3 +350,83 @@ footer {
 /* Relative & Z-index */
 .relative { position: relative; }
 .z-10 { z-index: 10; }
+
+/* Camera UI */
+.camera-preview-container {
+    position: relative;
+    width: 100%;
+    background: #000;
+    overflow: hidden;
+    border-radius: 24px;
+    box-shadow: 0 10px 50px -10px rgba(0,0,0,0.5);
+}
+
+.camera-preview-container video {
+    transform: scaleX(-1); /* Mirror for natural UX */
+}
+
+.camera-overlay {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 5;
+    pointer-events: none;
+}
+/* Readability for light backgrounds - ABSOLUTE CONTRAST OVERHAUL */
+.bg-white, .alert-info, .alert-success, .btn-zinc, .card.bg-white {
+    color: #000000 !important; /* Absolute Black */
+}
+
+/* Nav Tabs overriding Bootstrap Blue */
+.nav-tabs .nav-link {
+    color: var(--zinc-300) !important;
+    border: none !important;
+    transition: all 0.2s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--text-pure-white) !important;
+}
+
+.nav-tabs .nav-link.active {
+    color: #000000 !important; /* Absolute Black */
+    background-color: #ffffff !important; /* Ensure white background for black text */
+    border: none !important;
+}
+
+/* Force everything in tables inside light containers to Black */
+.bg-white .table tbody td,
+.card.bg-white .table tbody td {
+    color: #000000 !important;
+}
+
+.bg-white .text-zinc-500, 
+.alert-info .text-zinc-500, 
+.nav-tabs .nav-link.active,
+.btn-zinc .small,
+.glass-card .bg-white .text-zinc-500,
+.table .bg-white .text-zinc-500 {
+    color: #000000 !important; /* Force all secondary text to absolute black in light cards */
+}
+
+.bg-white h1, .bg-white h2, .bg-white h3, .bg-white h4, .bg-white h5, .bg-white h6,
+.table .fw-bold {
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+/* Ensure labels and forms in white cards are deep black */
+.bg-white label, .glass-card.bg-white label, .bg-white .form-label {
+    color: #000000 !important;
+    font-weight: 600 !important;
+}
+
+.role-selector-grid .role-btn {
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.role-selector-grid .role-btn.btn-zinc {
+    background: #fff !important;
+    color: #000 !important;
+}

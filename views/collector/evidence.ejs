@@ -1,5 +1,8 @@
 <%- include('../layout/header') %>
 
+<!-- Leaflet CSS — free, no API key needed -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
 <div class="hero-bg-mask" style="opacity: 0.1;"></div>
 
 <div class="relative z-10">
@@ -8,9 +11,6 @@
             <i data-lucide="chevron-left" style="width: 16px;"></i> Back to Quality Feed
         </a>
         <div class="d-flex gap-2">
-            <button class="btn-zinc-outline d-flex align-items-center gap-2">
-                <i data-lucide="flag" style="width: 14px;"></i> Flag Report
-            </button>
             <a href="/collector/evidence/<%= grievance._id %>/download" class="btn-zinc d-flex align-items-center gap-2 text-decoration-none">
                 <i data-lucide="download" style="width: 16px;"></i> Export Evidence Packet
             </a>
@@ -18,6 +18,7 @@
     </div>
 
     <div class="row g-4">
+        <!-- LEFT COLUMN: Main audit details -->
         <div class="col-md-8">
             <div class="glass-card animate-fade-in delay-100">
                 <div class="d-flex justify-content-between align-items-start mb-5 pb-4 border-bottom border-white border-opacity-5">
@@ -35,16 +36,21 @@
                 </div>
 
                 <div class="row g-4 mb-5">
-                    <div class="col-sm-6">
+                    <div class="col-sm-4">
                         <p class="text-zinc-500 small uppercase tracking-widest mb-1">SUBJECT MATTER</p>
-                        <div class="fw-bold fs-5"><%= grievance.subject %></div>
+                        <div class="fw-bold"><%= grievance.subject %></div>
                     </div>
-                    <div class="col-sm-6">
-                        <p class="text-zinc-500 small uppercase tracking-widest mb-1">OWNER DEPARTMENT</p>
-                        <div class="fw-bold fs-5 text-zinc-300"><%= grievance.department %></div>
+                    <div class="col-sm-4">
+                        <p class="text-zinc-500 small uppercase tracking-widest mb-1">DEPARTMENT</p>
+                        <div class="fw-bold text-zinc-300"><%= grievance.department %></div>
+                    </div>
+                    <div class="col-sm-4">
+                        <p class="text-zinc-500 small uppercase tracking-widest mb-1">DISTRICT</p>
+                        <div class="fw-bold text-zinc-300"><%= grievance.district %></div>
                     </div>
                 </div>
 
+                <!-- AI Risk & Confidence -->
                 <div class="row g-4 mb-5">
                     <div class="col-md-6">
                         <div class="stats-card p-4 bg-zinc-900/50 rounded-4 border border-white border-opacity-5">
@@ -65,11 +71,11 @@
                     </div>
                 </div>
 
+                <!-- Audit Flags -->
                 <h6 class="mb-4 d-flex align-items-center gap-2 text-zinc-400">
                     <i data-lucide="shield-alert" style="width: 18px;"></i>
                     Verification Audit Flags
                 </h6>
-                
                 <div class="space-y-3 mb-5">
                     <% if(grievance.verification.flags && grievance.verification.flags.length > 0) { %>
                         <% grievance.verification.flags.forEach(flag => { %>
@@ -84,12 +90,133 @@
                                 <i data-lucide="shield-check" class="text-success" style="width:24px; height:24px;"></i>
                             </div>
                             <div>
-                                <div class="text-success fw-bold">Anomaly Detection Passed</div>
+                                <div class="text-success fw-bold">All Checks Passed</div>
                                 <div class="text-success small opacity-75">All evidence vectors align with verified ground truth data.</div>
                             </div>
                         </div>
                     <% } %>
                 </div>
+
+                <!-- GPS Map: Complaint vs Officer Location -->
+                <h6 class="mb-4 d-flex align-items-center gap-2 text-zinc-400">
+                    <i data-lucide="map" style="width: 18px;"></i>
+                    GPS Verification Map
+                </h6>
+                <div id="evidence-map" style="height: 300px; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);" class="mb-4"></div>
+
+                <div class="row g-3 mb-5">
+                    <div class="col-sm-6">
+                        <div class="p-3 bg-zinc-900/50 rounded-3 border border-white border-opacity-5">
+                            <div class="small text-zinc-500 mb-1 uppercase tracking-widest" style="font-size:9px;">COMPLAINT LOCATION</div>
+                            <div class="small fw-bold font-monospace">
+                                <% if (grievance.complaint_lat) { %>
+                                    <%= grievance.complaint_lat.toFixed(6) %>, <%= grievance.complaint_lng.toFixed(6) %>
+                                <% } else { %>
+                                    <span class="text-zinc-600">Not captured</span>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 bg-zinc-900/50 rounded-3 border border-white border-opacity-5">
+                            <div class="small text-zinc-500 mb-1 uppercase tracking-widest" style="font-size:9px;">OFFICER LOCATION</div>
+                            <div class="small fw-bold font-monospace">
+                                <% if (grievance.evidence.officer_lat) { %>
+                                    <%= grievance.evidence.officer_lat.toFixed(6) %>, <%= grievance.evidence.officer_lng.toFixed(6) %>
+                                    <% if (grievance.evidence.gps_accuracy) { %>
+                                        <span class="text-zinc-500">(±<%= Math.round(grievance.evidence.gps_accuracy) %>m)</span>
+                                    <% } %>
+                                <% } else { %>
+                                    <span class="text-zinc-600">Not captured</span>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Verification Timeline -->
+                <h6 class="mb-4 d-flex align-items-center gap-2 text-zinc-400">
+                    <i data-lucide="git-branch" style="width: 18px;"></i>
+                    Verification Timeline
+                </h6>
+                <div class="mb-5">
+                    <% const timelineEvents = [
+                        { label: 'Complaint Submitted', time: grievance.createdAt, icon: 'inbox' },
+                        { label: 'Department Resolved', time: grievance.resolved_at, icon: 'check-circle-2' },
+                        { label: 'IVR Call Triggered', time: grievance.evidence.ivr_called_at, icon: 'phone' },
+                        { label: 'Evidence Submitted', time: grievance.evidence.evidence_submitted_at, icon: 'camera' },
+                        { label: 'ML Verification', time: grievance.verification.verified_at, icon: 'cpu' }
+                    ]; %>
+                    <% timelineEvents.forEach((evt, idx) => { %>
+                        <div class="d-flex align-items-start gap-3 mb-3">
+                            <div class="position-relative" style="min-width:32px;">
+                                <div class="d-flex align-items-center justify-content-center rounded-circle
+                                    <%= evt.time ? 'bg-success bg-opacity-10' : 'bg-zinc-800' %>"
+                                     style="width:32px; height:32px;">
+                                    <i data-lucide="<%= evt.icon %>"
+                                       class="<%= evt.time ? 'text-success' : 'text-zinc-600' %>"
+                                       style="width:14px; height:14px;"></i>
+                                </div>
+                                <% if (idx < timelineEvents.length - 1) { %>
+                                    <div style="position:absolute; left:15px; top:32px; width:2px; height:24px;
+                                         background: rgba(255,255,255,0.05);"></div>
+                                <% } %>
+                            </div>
+                            <div class="pt-1">
+                                <div class="small fw-bold <%= evt.time ? 'text-white' : 'text-zinc-600' %>"><%= evt.label %></div>
+                                <div class="small text-zinc-500" style="font-size:10px;">
+                                    <%= evt.time ? new Date(evt.time).toLocaleString() : 'Pending' %>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <!-- Field Visit GPS Log -->
+                <% if (grievance.field_visits && grievance.field_visits.length > 0) { %>
+                    <h6 class="mb-4 d-flex align-items-center gap-2 text-zinc-400">
+                        <i data-lucide="footprints" style="width: 18px;"></i>
+                        GPS-Stamped Field Visit Log
+                    </h6>
+                    <div class="glass-card p-0 overflow-hidden mb-5" style="background: rgba(255,255,255,0.01);">
+                        <table class="table table-sm mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4 small">TIMESTAMP</th>
+                                    <th class="small">ACTION</th>
+                                    <th class="small">GPS COORDINATES</th>
+                                    <th class="small">ACCURACY</th>
+                                    <th class="pe-4 small">OFFICER</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% grievance.field_visits.forEach(visit => { %>
+                                    <tr>
+                                        <td class="ps-4 small font-monospace text-zinc-400">
+                                            <%= new Date(visit.timestamp).toLocaleString() %>
+                                        </td>
+                                        <td>
+                                            <span class="badge-zinc" style="font-size:8px;"><%= visit.action %></span>
+                                        </td>
+                                        <td class="small font-monospace">
+                                            <%= visit.lat.toFixed(6) %>, <%= visit.lng.toFixed(6) %>
+                                        </td>
+                                        <td class="small">
+                                            <% if (visit.accuracy) { %>
+                                                ±<%= Math.round(visit.accuracy) %>m
+                                            <% } else { %>
+                                                <span class="text-zinc-600">—</span>
+                                            <% } %>
+                                        </td>
+                                        <td class="pe-4 small text-zinc-400">
+                                            <%= visit.officer_id ? (visit.officer_id.name || visit.officer_id) : '—' %>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } %>
 
                 <div class="p-4 bg-zinc-900/70 rounded-4 border border-white border-opacity-5">
                     <div class="small text-zinc-500 uppercase tracking-widest mb-3 font-monospace">Automated Insight Summary</div>
@@ -98,25 +225,93 @@
             </div>
         </div>
 
+        <!-- RIGHT COLUMN: Photo, IVR, Personnel -->
         <div class="col-md-4">
+            <!-- Photographic Proof -->
             <div class="glass-card mb-4 animate-fade-in delay-200">
-                <h6 class="small text-zinc-500 uppercase tracking-widest mb-4">Photographic Proof</h6>
+                <h6 class="small text-zinc-500 uppercase tracking-widest mb-4">Photographic Evidence Audit</h6>
+                
                 <% if(grievance.evidence.photo_url) { %>
-                    <div class="relative rounded-4 overflow-hidden mb-3 border border-white border-opacity-5">
-                       <img src="<%= grievance.evidence.photo_url %>" class="img-fluid w-100 grayscale hover:grayscale-0 transition-all duration-500">
+                    <!-- Toggle between Original and Watermarked -->
+                    <div class="relative rounded-4 overflow-hidden mb-3 border border-white border-opacity-5 group position-relative">
+                        <img id="main-evidence-photo" src="<%= grievance.evidence.photo_watermarked_url || grievance.evidence.photo_url %>" class="img-fluid w-100">
+                        <div class="position-absolute bottom-0 end-0 p-3">
+                            <button id="photo-toggle-btn" class="btn-zinc-outline p-2 px-3 small d-flex align-items-center gap-2" style="font-size: 10px; background: rgba(0,0,0,0.8);">
+                                <i data-lucide="refresh-cw" style="width:12px;"></i> View <span id="toggle-label">Original</span>
+                            </button>
+                        </div>
                     </div>
+
                     <div class="space-y-3 pt-3 border-top border-white border-opacity-5">
-                        <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="text-zinc-500 small">GIS INTEGRITY</span>
                             <span class="badge-zinc <%= grievance.evidence.gps_match_flag ? 'text-success' : 'text-danger' %>">
                                 <%= grievance.evidence.gps_match_flag ? 'VERIFIED' : 'MISMATCH' %>
                             </span>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-zinc-500 small">DISTANCE VECTOR</span>
-                            <span class="text-white small fw-bold"><%= grievance.evidence.gps_distance_meters %> meters</span>
+
+                        <!-- EXIF Metadata Check -->
+                        <div class="p-3 bg-zinc-950 rounded-3 border border-white border-opacity-5 mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-zinc-500 small font-monospace" style="font-size: 10px;">EXIF CROSS-CHECK</span>
+                                <% if (grievance.evidence.exif_match_status === 'MATCH') { %>
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-20" style="font-size: 8px;">MATCHED ✓</span>
+                                <% } else if (grievance.evidence.exif_match_status === 'MISMATCH') { %>
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-20" style="font-size: 8px;">FRAUD ALERT ✗</span>
+                                <% } else { %>
+                                    <span class="badge bg-zinc-800 text-zinc-500 border border-zinc-700" style="font-size: 8px;">NO EXIF</span>
+                                <% } %>
+                            </div>
+                            
+                            <% if (grievance.evidence.exif_camera) { %>
+                                <div class="small text-zinc-400 mb-1 d-flex align-items-center gap-2">
+                                    <i data-lucide="smartphone" style="width:12px;"></i>
+                                    <%= grievance.evidence.exif_camera %>
+                                </div>
+                            <% } %>
+                            
+                            <% if (grievance.evidence.exif_lat) { %>
+                                <div class="font-monospace text-zinc-500" style="font-size: 10px;">
+                                    Embedded: <%= grievance.evidence.exif_lat.toFixed(6) %>, <%= grievance.evidence.exif_lng.toFixed(6) %>
+                                    <% if (grievance.evidence.exif_distance_meters != null) { %>
+                                        <br><span class="text-zinc-600">Off by <%= grievance.evidence.exif_distance_meters %>m from device reporting</span>
+                                    <% } %>
+                                </div>
+                            <% } %>
                         </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-zinc-500 small">SITE DISTANCE</span>
+                            <span class="text-white small fw-bold">
+                                <%= grievance.evidence.gps_distance_meters != null
+                                    ? grievance.evidence.gps_distance_meters + 'm'
+                                    : 'N/A' %>
+                            </span>
+                        </div>
+                        <% if (grievance.evidence.gps_accuracy) { %>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-zinc-500 small">GPS ACCURACY</span>
+                            <span class="text-white small fw-bold">±<%= Math.round(grievance.evidence.gps_accuracy) %>m</span>
+                        </div>
+                        <% } %>
                     </div>
+
+                    <script>
+                        const img = document.getElementById('main-evidence-photo');
+                        const btn = document.getElementById('photo-toggle-btn');
+                        const label = document.getElementById('toggle-label');
+                        const watermarkedUrl = '<%= grievance.evidence.photo_watermarked_url || grievance.evidence.photo_url %>';
+                        const originalUrl = '<%= grievance.evidence.photo_url %>';
+                        let showingWatermarked = true;
+
+                        if (btn) {
+                            btn.addEventListener('click', () => {
+                                showingWatermarked = !showingWatermarked;
+                                img.src = showingWatermarked ? watermarkedUrl : originalUrl;
+                                label.textContent = showingWatermarked ? 'Original' : 'Watermarked';
+                            });
+                        }
+                    </script>
                 <% } else { %>
                     <div class="text-center py-5 bg-zinc-900/50 rounded-4 border-dashed border-zinc-800">
                         <i data-lucide="image-off" class="text-zinc-600 mb-2" style="width:32px; height:32px;"></i>
@@ -125,30 +320,62 @@
                 <% } %>
             </div>
 
+            <!-- IVR Feedback -->
             <div class="glass-card mb-4 animate-fade-in delay-300" style="background: rgba(255,255,255,0.02);">
                 <h6 class="small text-zinc-500 uppercase tracking-widest mb-4 d-flex align-items-center gap-2">
-                    <i data-lucide="phone"></i> Voice Feedback Loop (IVR)
+                    <i data-lucide="phone"></i> IVR Feedback Loop
                 </h6>
                 <div class="space-y-3">
-                    <div class="d-flex justify-content-between align-items-center py-2 px-3 bg-zinc-950 rounded-3 border border-white border-opacity-5">
+                    <div class="d-flex justify-content-between align-items-center py-2 px-3 bg-zinc-950 rounded-3 border border-white border-opacity-5 mb-2">
                         <span class="text-zinc-500 small">CALL STATUS</span>
                         <span class="small fw-bold"><%= grievance.evidence.ivr_call_status %></span>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center py-2 px-3 bg-zinc-950 rounded-3 border border-white border-opacity-5">
-                        <span class="text-zinc-500 small">RESPONSE CODE</span>
+                    <div class="d-flex justify-content-between align-items-center py-2 px-3 bg-zinc-950 rounded-3 border border-white border-opacity-5 mb-2">
+                        <span class="text-zinc-500 small">RESPONSE</span>
                         <span class="small fw-bold">
                             <% if(grievance.evidence.ivr_response === 1) { %> <span class="text-success">Satisfied (1)</span>
                             <% } else if(grievance.evidence.ivr_response === 2) { %> <span class="text-danger">Disputed (2)</span>
                             <% } else { %> <span class="text-zinc-600">Pending</span> <% } %>
                         </span>
                     </div>
-                    <p class="text-zinc-600 mt-3 mb-0" style="font-size: 10px;">
+                    <p class="text-zinc-600 mt-2 mb-0" style="font-size: 10px;">
                         LOGGED: <%= grievance.evidence.ivr_called_at ? new Date(grievance.evidence.ivr_called_at).toLocaleString() : 'PENDING' %>
                     </p>
                 </div>
             </div>
 
-            <div class="glass-card text-center py-4 bg-white bg-opacity-5 animate-fade-in delay-400">
+            <!-- Personnel Audit -->
+            <div class="glass-card mb-4 animate-fade-in delay-400" style="background: rgba(255,255,255,0.02);">
+                <h6 class="small text-zinc-500 uppercase tracking-widest mb-4 d-flex align-items-center gap-2">
+                    <i data-lucide="users"></i> Personnel Audit
+                </h6>
+                <div class="mb-3">
+                    <div class="small text-zinc-500 mb-1">RESOLVED BY</div>
+                    <div class="small fw-bold">
+                        <%= grievance.resolved_by ? grievance.resolved_by.name : '—' %>
+                        <% if (grievance.resolved_by) { %>
+                            <span class="text-zinc-600">(<%= grievance.resolved_by.email %>)</span>
+                        <% } %>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="small text-zinc-500 mb-1">FIELD OFFICER</div>
+                    <div class="small fw-bold">
+                        <%= grievance.assigned_officer ? grievance.assigned_officer.name : '—' %>
+                        <% if (grievance.assigned_officer) { %>
+                            <span class="text-zinc-600">(<%= grievance.assigned_officer.email %>)</span>
+                        <% } %>
+                    </div>
+                </div>
+                <% if (grievance.reopened_by) { %>
+                <div class="p-2 bg-danger bg-opacity-10 rounded-3 border border-danger border-opacity-20">
+                    <div class="small text-zinc-500 mb-1">REOPENED BY</div>
+                    <div class="small fw-bold text-danger"><%= grievance.reopened_by %></div>
+                </div>
+                <% } %>
+            </div>
+
+            <div class="glass-card text-center py-4 bg-white bg-opacity-5 animate-fade-in delay-500">
                 <i data-lucide="fingerprint" class="text-zinc-500 mb-2" style="width:24px; height:24px;"></i>
                 <div class="small text-zinc-500 uppercase tracking-widest mb-1" style="font-size: 8px;">Audit Integrity</div>
                 <div class="small fw-bold text-success" style="font-size: 10px;">CRYPTOGRAPHICALLY SECURED</div>
@@ -156,5 +383,79 @@
         </div>
     </div>
 </div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const complaintLat = <%= grievance.complaint_lat || 'null' %>;
+    const complaintLng = <%= grievance.complaint_lng || 'null' %>;
+    const officerLat   = <%= grievance.evidence.officer_lat || 'null' %>;
+    const officerLng   = <%= grievance.evidence.officer_lng || 'null' %>;
+
+    const mapEl = document.getElementById('evidence-map');
+    if (!mapEl) return;
+
+    // Default centre: first available point or Ahmedabad
+    const centreLat = complaintLat || officerLat || 23.0225;
+    const centreLng = complaintLng || officerLng || 72.5714;
+
+    const map = L.map('evidence-map', {
+        center: [centreLat, centreLng],
+        zoom: 14,
+        zoomControl: true,
+        attributionControl: false
+    });
+
+    // Dark-themed tile layer (CartoDB Dark Matter — free)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19
+    }).addTo(map);
+
+    const bounds = [];
+
+    // Complaint pin (blue)
+    if (complaintLat && complaintLng) {
+        const marker = L.circleMarker([complaintLat, complaintLng], {
+            radius: 10, color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.7, weight: 2
+        }).addTo(map);
+        marker.bindPopup('<b>Complaint Location</b><br>Citizen-submitted GPS');
+        bounds.push([complaintLat, complaintLng]);
+    }
+
+    // Officer pin (orange)
+    if (officerLat && officerLng) {
+        const marker = L.circleMarker([officerLat, officerLng], {
+            radius: 10, color: '#f97316', fillColor: '#f97316', fillOpacity: 0.7, weight: 2
+        }).addTo(map);
+        marker.bindPopup('<b>Officer Location</b><br>Field evidence GPS');
+        bounds.push([officerLat, officerLng]);
+    }
+
+    // Draw line between them if both exist
+    if (complaintLat && officerLat) {
+        L.polyline([[complaintLat, complaintLng], [officerLat, officerLng]], {
+            color: '#ef4444', weight: 2, dashArray: '6,6', opacity: 0.6
+        }).addTo(map);
+    }
+
+    // Field visit trail markers (green)
+    <% if (grievance.field_visits && grievance.field_visits.length > 0) { %>
+        <% grievance.field_visits.forEach((v, i) => { %>
+            L.circleMarker([<%= v.lat %>, <%= v.lng %>], {
+                radius: 6, color: '#22c55e', fillColor: '#22c55e', fillOpacity: 0.5, weight: 1
+            }).addTo(map).bindPopup('Visit #<%= i+1 %>: <%= v.action %><br><%= new Date(v.timestamp).toLocaleString() %>');
+            bounds.push([<%= v.lat %>, <%= v.lng %>]);
+        <% }) %>
+    <% } %>
+
+    // Fit bounds if we have markers
+    if (bounds.length > 1) {
+        map.fitBounds(bounds, { padding: [40, 40] });
+    } else if (bounds.length === 0) {
+        mapEl.innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 text-zinc-600"><span>No GPS data available</span></div>';
+    }
+});
+</script>
 
 <%- include('../layout/footer') %>

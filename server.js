@@ -9,6 +9,15 @@ const app  = express();
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://localhost:27017/grievance-verification';
 
+// ── Global Middleware — ensure ngrok doesn't block webhooks (Twilio/IVR) ─────
+app.use((req, res, next) => {
+  res.setHeader('ngrok-skip-browser-warning', '1');
+  if (req.url.includes('/api/ivr') || req.url.includes('/audio/')) {
+    console.log(`[IVR-TRAFFIC] ${req.method} ${req.url} | UA: ${req.headers['user-agent']}`);
+  }
+  next();
+});
+
 // ── Body parsers & static files ──────────────────────────────────────────────
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -28,13 +37,15 @@ app.use(session({
 
 // ── IVR webhook routes — registered BEFORE session hydration so Twilio
 //    callbacks (which send no session cookie) are handled cleanly ────────────
-// The ngrok-skip-browser-warning header bypasses ngrok's interstitial page
-// which would otherwise return HTML to Twilio instead of TwiML → "App Error"
 const ivrRoutes = require('./routes/ivrRoutes');
-app.use('/api/ivr', (req, res, next) => {
-  res.setHeader('ngrok-skip-browser-warning', '1');
+app.use('/api/ivr', ivrRoutes);
+
+// ── Public routes (no auth required) ──────────────────────────────────────────
+const publicRoutes = require('./routes/publicRoutes');
+app.use('/public', (req, res, next) => {
+  res.locals.currentUser = null;  // layout templates expect this variable
   next();
-}, ivrRoutes);
+}, publicRoutes);
 
 // ── Hydrate session for all authenticated routes ──────────────────────────────
 app.use(hydrateSessionUser);
@@ -60,8 +71,8 @@ app.use('/',           indexRoutes);
 app.use('/auth',       authRoutes);
 app.use('/citizen',    citizenRoutes);
 app.use('/department', departmentRoutes);
-app.use('/',           fieldOfficerRoutes);
-app.use('/',           collectorRoutes);
+app.use('/officer',    fieldOfficerRoutes);
+app.use('/collector',  collectorRoutes);
 
 // ── Serve uploaded evidence photos ────────────────────────────────────────────
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));

@@ -106,6 +106,7 @@
     </div>
 </div>
 
+<!-- Evidence Modals -->
 <% complaints.forEach(complaint => { %>
     <div class="modal fade evidence-modal" id="modal-<%= complaint._id %>" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
@@ -119,23 +120,66 @@
                 </div>
                 <div class="modal-body p-5 pt-4">
                     <form class="evidence-form" action="/officer/evidence/<%= complaint._id %>/submit" method="POST" enctype="multipart/form-data" novalidate>
-                        <div class="mb-5 text-center p-5 bg-zinc-900 rounded-4 border-dashed border-zinc-800 transition-all hover:bg-zinc-800/50 cursor-pointer evidence-upload-card">
-                            <i data-lucide="camera" class="d-block mx-auto mb-3 text-zinc-500" style="width:48px; height:48px;"></i>
-                            <div class="fw-bold mb-1">Click to Upload Resolution Proof</div>
-                            <p class="text-zinc-500 small mb-0">High-resolution JPEG, PNG, or WebP only</p>
-                            <input type="file" name="photo" accept="image/png,image/jpeg,image/webp" class="form-control mt-4 bg-zinc-950 border-zinc-800 evidence-photo-input" required>
-                            <div class="small text-zinc-500 mt-2 evidence-file-name">No file selected</div>
+                        
+                        <!-- Camera-only capture — prevents gallery/fake photo uploads -->
+                        <div class="mb-4">
+                            <div class="camera-preview-container mb-3" id="camera-container-<%= complaint._id %>" style="display: none;">
+                                <video id="video-<%= complaint._id %>" autoplay playsinline muted class="w-100 rounded-4 border border-white border-opacity-10"></video>
+                                <canvas id="canvas-<%= complaint._id %>" style="display: none;"></canvas>
+                                <div class="camera-overlay">
+                                    <div class="badge-zinc" style="background: rgba(0,0,0,0.5);">LIVE FEED</div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2 mb-3">
+                                <button type="button" class="btn-zinc-outline flex-grow-1 py-3 d-flex align-items-center justify-content-center gap-2" id="toggle-cam-<%= complaint._id %>" onclick="toggleCamera('<%= complaint._id %>')">
+                                    <i data-lucide="video" style="width:18px;"></i>
+                                    <span id="cam-btn-text-<%= complaint._id %>">Trigger Camera</span>
+                                </button>
+                                <button type="button" class="btn-zinc flex-grow-1 py-3 d-flex align-items-center justify-content-center gap-2" id="capture-btn-<%= complaint._id %>" style="display: none;" onclick="captureSnapshot('<%= complaint._id %>')">
+                                    <i data-lucide="camera" style="width:18px;"></i>
+                                    Capture Snapshot
+                                </button>
+                            </div>
+
+                            <div id="upload-card-<%= complaint._id %>" class="text-center p-5 bg-zinc-900 rounded-4 border-dashed border-zinc-800 transition-all hover:bg-zinc-800/50 cursor-pointer evidence-upload-card">
+                                <i data-lucide="upload" class="d-block mx-auto mb-3 text-zinc-500" style="width:48px; height:48px;"></i>
+                                <div class="fw-bold mb-1">Manual Photo Upload</div>
+                                <p class="text-zinc-500 small mb-2">Use if camera permission is denied</p>
+                                <input type="file" name="photo" id="file-input-<%= complaint._id %>" accept="image/png,image/jpeg,image/webp"
+                                       capture="environment"
+                                       class="form-control mt-3 bg-zinc-950 border-zinc-800 evidence-photo-input" required>
+                                <div class="small text-zinc-500 mt-2 evidence-file-name">No photo captured</div>
+                            </div>
                         </div>
 
-                        <div class="mb-5">
+                        <!-- GPS Status -->
+                        <div class="mb-4">
                             <label class="form-label small fw-bold text-zinc-500 mb-3 tracking-widest">POSITION VALIDATION</label>
-                            <button type="button" class="btn-zinc-outline w-100 detectGPS py-3 d-flex align-items-center justify-content-center gap-2" data-target="<%= complaint._id %>">
-                                <i data-lucide="target"></i> Acquire Current Coordinates
-                            </button>
-                            <div id="gps-display-<%= complaint._id %>" class="mt-3 text-center small text-zinc-500 font-monospace">Waiting for Signal...</div>
-                            <div class="small text-zinc-500 mt-2 text-center">GPS is optional, but recommended for faster verification.</div>
+                            <div id="gps-auto-status-<%= complaint._id %>" class="p-3 bg-zinc-900 rounded-3 border border-white border-opacity-5 d-flex align-items-center gap-3 mb-3">
+                                <div class="spinner-border spinner-border-sm text-saffron" id="gps-spinner-<%= complaint._id %>"></div>
+                                <span class="small text-zinc-400" id="gps-auto-text-<%= complaint._id %>">Acquiring GPS automatically...</span>
+                            </div>
+                            <div id="gps-display-<%= complaint._id %>" class="text-center small text-zinc-500 font-monospace"></div>
+                            <!-- Hidden fields for dual GPS pings -->
                             <input type="hidden" name="lat" id="lat-<%= complaint._id %>">
                             <input type="hidden" name="lng" id="lng-<%= complaint._id %>">
+                            <input type="hidden" name="accuracy" id="accuracy-<%= complaint._id %>">
+                            <!-- Modal-open GPS (first ping) -->
+                            <input type="hidden" name="modal_open_lat" id="mo-lat-<%= complaint._id %>">
+                            <input type="hidden" name="modal_open_lng" id="mo-lng-<%= complaint._id %>">
+                            <input type="hidden" name="modal_open_accuracy" id="mo-acc-<%= complaint._id %>">
+                        </div>
+
+                        <div class="stats-card p-3 mb-4 border border-white border-opacity-5">
+                            <div class="d-flex align-items-start gap-2">
+                                <i data-lucide="shield-alert" class="text-saffron flex-shrink-0" style="width:16px; height:16px; margin-top:2px;"></i>
+                                <div class="small text-zinc-500">
+                                    <strong class="text-zinc-300">Photo verification:</strong> 
+                                    GPS coordinates and timestamp are watermarked onto the photo. 
+                                    EXIF metadata is cross-verified against your live location.
+                                </div>
+                            </div>
                         </div>
 
                         <button type="submit" class="btn-zinc w-100 py-3 fw-bold evidence-submit-btn d-flex align-items-center justify-content-center gap-2">
@@ -150,78 +194,165 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.detectGPS').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const id = this.getAttribute('data-target');
-            const display = document.getElementById('gps-display-' + id);
+    // ── Live Camera Management ──────────────────────────────────────────
+    const streams = {};
 
-            if (!navigator.geolocation) {
-                if (display) {
-                    display.textContent = 'SIGNAL FAILED: Geolocation is not supported in this browser.';
-                    display.className = 'mt-3 text-danger small font-monospace';
-                }
-                return;
+    window.toggleCamera = async function(id) {
+        const video = document.getElementById('video-' + id);
+        const container = document.getElementById('camera-container-' + id);
+        const captureBtn = document.getElementById('capture-btn-' + id);
+        const btnText = document.getElementById('cam-btn-text-' + id);
+        const uploadCard = document.getElementById('upload-card-' + id);
+
+        if (streams[id]) {
+            // Stop camera
+            streams[id].getTracks().forEach(track => track.stop());
+            delete streams[id];
+            video.srcObject = null;
+            container.style.display = 'none';
+            captureBtn.style.display = 'none';
+            btnText.textContent = 'Trigger Camera';
+            uploadCard.style.display = 'block';
+        } else {
+            // Start camera
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' },
+                    audio: false
+                });
+                streams[id] = stream;
+                video.srcObject = stream;
+                container.style.display = 'block';
+                captureBtn.style.display = 'block';
+                btnText.textContent = 'Close Camera';
+                uploadCard.style.display = 'none';
+            } catch (err) {
+                console.error('Camera error:', err);
+                alert('Could not access camera. Please check permissions.');
             }
+        }
+    };
 
-            this.disabled = true;
-            this.innerHTML = '<i data-lucide="loader-circle" class="me-2"></i> Acquiring Signal...';
-            lucide.createIcons();
+    window.captureSnapshot = function(id) {
+        const video = document.getElementById('video-' + id);
+        const canvas = document.getElementById('canvas-' + id);
+        const fileInput = document.getElementById('file-input-' + id);
+        const fileNameEl = document.querySelector(`#modal-${id} .evidence-file-name`);
 
-            navigator.geolocation.getCurrentPosition(
-                pos => {
-                    const latInput = document.getElementById('lat-' + id);
-                    const lngInput = document.getElementById('lng-' + id);
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
 
-                    if (latInput) {
-                        latInput.value = pos.coords.latitude;
-                    }
-                    if (lngInput) {
-                        lngInput.value = pos.coords.longitude;
-                    }
-                    if (display) {
-                        display.innerHTML = `<span class="text-success fw-bold">SIGNAL LOCKED: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}</span>`;
-                    }
+        canvas.toBlob((blob) => {
+            const file = new File([blob], `capture_${Date.now()}.jpg`, { type: 'image/jpeg' });
+            
+            // Inject file into input using DataTransfer
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
 
-                    this.innerHTML = '<i data-lucide="check" class="me-2"></i> Signal Acquired';
-                    this.classList.replace('btn-zinc-outline', 'btn-zinc');
-                    this.disabled = false;
-                    lucide.createIcons();
-                },
-                () => {
-                    if (display) {
-                        display.textContent = 'SIGNAL FAILED: Enable GPS/Location Access or retry.';
-                        display.className = 'mt-3 text-danger small font-monospace';
-                    }
-                    this.innerHTML = '<i data-lucide="refresh-cw" class="me-2"></i> Retry Acquisition';
-                    this.disabled = false;
-                    this.classList.add('btn-zinc-outline');
-                    this.classList.remove('btn-zinc');
-                    lucide.createIcons();
-                }
-            );
+            if (fileNameEl) fileNameEl.textContent = 'Snapshot captured ✓';
+            
+            // Trigger GPS re-acquire and stop camera
+            const event = new Event('change', { bubbles: true });
+            fileInput.dispatchEvent(event);
+            toggleCamera(id);
+        }, 'image/jpeg', 0.9);
+    };
+
+    // ── Auto-GPS on modal open (first GPS ping) ───────────────────────────
+    document.querySelectorAll('.evidence-modal').forEach(modal => {
+        modal.addEventListener('shown.bs.modal', function() {
+            const id = this.id.replace('modal-', '');
+            acquireGps(id, true);  // true = modal-open ping
+        });
+
+        // Ensure camera stops when modal closes
+        modal.addEventListener('hidden.bs.modal', function() {
+            const id = this.id.replace('modal-', '');
+            if (streams[id]) toggleCamera(id);
         });
     });
 
+    function acquireGps(id, isModalOpen) {
+        if (!navigator.geolocation) {
+            const textEl = document.getElementById('gps-auto-text-' + id);
+            if (textEl) textEl.textContent = 'GPS not supported in this browser';
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                const acc = pos.coords.accuracy;
+
+                if (isModalOpen) {
+                    // Store as first GPS ping (modal-open)
+                    const moLat = document.getElementById('mo-lat-' + id);
+                    const moLng = document.getElementById('mo-lng-' + id);
+                    const moAcc = document.getElementById('mo-acc-' + id);
+                    if (moLat) moLat.value = lat;
+                    if (moLng) moLng.value = lng;
+                    if (moAcc) moAcc.value = acc;
+                }
+
+                // Always update the submit GPS (latest reading)
+                const latEl = document.getElementById('lat-' + id);
+                const lngEl = document.getElementById('lng-' + id);
+                const accEl = document.getElementById('accuracy-' + id);
+                if (latEl) latEl.value = lat;
+                if (lngEl) lngEl.value = lng;
+                if (accEl) accEl.value = acc;
+
+                // Update UI
+                const spinner = document.getElementById('gps-spinner-' + id);
+                const textEl  = document.getElementById('gps-auto-text-' + id);
+                if (spinner) spinner.style.display = 'none';
+                if (textEl) {
+                    textEl.innerHTML = `<span class="text-success fw-bold">LOCKED:</span> ` +
+                        `${lat.toFixed(4)}, ${lng.toFixed(4)} ` +
+                        `<span class="text-zinc-500">(±${Math.round(acc)}m)</span>`;
+                }
+            },
+            () => {
+                const spinner = document.getElementById('gps-spinner-' + id);
+                const textEl  = document.getElementById('gps-auto-text-' + id);
+                if (spinner) spinner.style.display = 'none';
+                if (textEl) textEl.innerHTML = '<span class="text-danger">GPS unavailable — enable location access</span>';
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    }
+
+    // ── Re-acquire GPS on photo capture (second GPS ping) ─────────────────
     document.querySelectorAll('.evidence-photo-input').forEach(input => {
         input.addEventListener('change', function() {
-            const uploadCard = this.closest('.evidence-upload-card');
-            const fileNameNode = uploadCard ? uploadCard.querySelector('.evidence-file-name') : null;
-            const selected = this.files && this.files[0] ? this.files[0].name : 'No file selected';
-            if (fileNameNode) {
-                fileNameNode.textContent = selected;
+            const uploadCard  = this.closest('.evidence-upload-card');
+            const fileNameEl  = uploadCard ? uploadCard.querySelector('.evidence-file-name') : null;
+            const selected    = this.files && this.files[0] ? this.files[0].name : 'No photo captured';
+            if (fileNameEl) fileNameEl.textContent = selected;
+
+            // Get the complaint ID from the form action
+            const form = this.closest('form');
+            const action = form ? form.getAttribute('action') : '';
+            const idMatch = action.match(/evidence\/([^/]+)\/submit/);
+            if (idMatch) {
+                acquireGps(idMatch[1], false);  // false = this is the photo-time ping
             }
         });
     });
 
+    // ── Form submission validation ────────────────────────────────────────
     document.querySelectorAll('.evidence-form').forEach(form => {
         form.addEventListener('submit', function(event) {
             const photoInput = this.querySelector('.evidence-photo-input');
-            const submitBtn = this.querySelector('.evidence-submit-btn');
-            const label = this.querySelector('.submit-label');
+            const submitBtn  = this.querySelector('.evidence-submit-btn');
+            const label      = this.querySelector('.submit-label');
 
             if (!photoInput || !photoInput.files || !photoInput.files.length) {
                 event.preventDefault();
-                showEvidenceError(this, 'Please attach an evidence image before submitting.');
+                showEvidenceError(this, 'Please capture an evidence photo before submitting.');
                 return;
             }
 
@@ -230,7 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 submitBtn.classList.add('opacity-75');
             }
             if (label) {
-                label.textContent = 'Uploading Evidence...';
+                label.textContent = 'Processing evidence (watermarking + EXIF verification)...';
             }
         });
     });
